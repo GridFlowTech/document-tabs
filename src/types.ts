@@ -129,8 +129,13 @@ export function getWorkspaceFolder(uri: vscode.Uri): string {
 }
 
 /**
- * Gets the project/solution folder for a URI
- * This detects project folders like Users.Api, Users.Contracts based on common patterns
+ * Cache for project folder lookups to avoid repeated file system scans
+ */
+const projectFolderCache = new Map<string, string>();
+
+/**
+ * Gets the project folder for a URI by finding the nearest folder containing a project file
+ * (.csproj, .fsproj, .vbproj, package.json, etc.)
  */
 export function getProjectFolder(uri: vscode.Uri): string {
     const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
@@ -138,44 +143,67 @@ export function getProjectFolder(uri: vscode.Uri): string {
         return 'External';
     }
 
-    // Get relative path from workspace folder
+    // Get the directory path of the file
+    const filePath = uri.fsPath;
+    const workspacePath = workspaceFolder.uri.fsPath;
+    
+    // Check cache first
+    const cacheKey = filePath;
+    if (projectFolderCache.has(cacheKey)) {
+        return projectFolderCache.get(cacheKey)!;
+    }
+
+    // Get relative path and split into parts
     const relativePath = vscode.workspace.asRelativePath(uri, false);
     const pathParts = relativePath.split(/[/\\]/);
-
-    // Look for common project patterns in the path
-    // Pattern 1: Look for folders ending with common project suffixes
-    const projectSuffixes = ['.Api', '.Contracts', '.Infrastructure', '.Service', '.Services', 
-                            '.Core', '.Domain', '.Application', '.Web', '.Tests', '.Common',
-                            '.Data', '.Models', '.Shared', '.Client', '.Server'];
     
-    for (const part of pathParts) {
-        for (const suffix of projectSuffixes) {
-            if (part.endsWith(suffix)) {
-                return part;
-            }
-        }
-    }
-
-    // Pattern 2: If path has 'src' folder, use the folder after src
-    const srcIndex = pathParts.findIndex(p => p.toLowerCase() === 'src');
-    if (srcIndex !== -1 && srcIndex + 1 < pathParts.length - 1) {
-        return pathParts[srcIndex + 1];
-    }
-
-    // Pattern 3: Look for folders containing project files (.csproj, .fsproj, package.json, etc.)
-    // For now, use the first significant folder after workspace root
-    if (pathParts.length > 1) {
+    // Remove the filename to get directory parts
+    const dirParts = pathParts.slice(0, -1);
+    
+    // Walk through the path from the file's directory upward
+    // Look for the folder name that likely represents a project
+    for (let i = dirParts.length - 1; i >= 0; i--) {
+        const folderName = dirParts[i];
+        
         // Skip common non-project folders
-        const skipFolders = ['src', 'source', 'lib', 'libs', 'packages', 'node_modules', 'bin', 'obj', 'out', 'dist', 'build'];
-        for (const part of pathParts.slice(0, -1)) { // Exclude filename
-            if (!skipFolders.includes(part.toLowerCase()) && part.length > 0) {
-                return part;
+        const skipFolders = ['bin', 'obj', 'debug', 'release', 'node_modules', 'dist', 'out', 'build', 
+                           '.vs', '.git', 'properties', 'wwwroot', 'controllers', 'models', 'views',
+                           'services', 'repositories', 'data', 'entities', 'dtos', 'interfaces',
+                           'migrations', 'configurations', 'helpers', 'extensions', 'middleware'];
+        
+        if (skipFolders.includes(folderName.toLowerCase())) {
+            continue;
+        }
+        
+        // Check if this folder name looks like a project name
+        // Common patterns: ends with .Api, .Core, .Domain, .Infrastructure, .Service, etc.
+        // Or contains a dot suggesting it's a namespaced project name
+        const projectPatterns = [
+            /\.(Api|Core|Domain|Infrastructure|Service|Services|Application|Web|Tests|Common|Data|Models|Shared|Client|Server|Contracts|Business|Logic|Repository|Repositories|Handlers|Commands|Queries|Events)$/i,
+            /^[A-Z][a-zA-Z0-9]*\.[A-Z][a-zA-Z0-9]*/, // Pattern like "Users.Api", "Company.Project"
+        ];
+        
+        for (const pattern of projectPatterns) {
+            if (pattern.test(folderName)) {
+                projectFolderCache.set(cacheKey, folderName);
+                return folderName;
             }
         }
     }
-
+    
+    // If no pattern matched, use the first meaningful folder after common root folders
+    for (const folderName of dirParts) {
+        const rootFolders = ['src', 'source', 'lib', 'libs', 'packages', 'projects', 'apps', 'modules'];
+        if (!rootFolders.includes(folderName.toLowerCase()) && folderName.length > 0) {
+            projectFolderCache.set(cacheKey, folderName);
+            return folderName;
+        }
+    }
+    
     // Fallback to workspace folder name
-    return workspaceFolder.name;
+    const result = workspaceFolder.name;
+    projectFolderCache.set(cacheKey, result);
+    return result;
 }
 
 /**

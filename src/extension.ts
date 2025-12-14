@@ -1,24 +1,6 @@
 import * as vscode from 'vscode';
 import { DocumentTabsProvider } from './tabsProvider';
-import { TabItem, TreeViewItem, isTabItem, getTabUri, SortOrder, GroupBy } from './types';
-
-/**
- * Updates the context for menu checkmarks
- */
-function updateMenuContext() {
-    const config = vscode.workspace.getConfiguration('documentTabs');
-    const sortOrder = config.get<SortOrder>('sortOrder', 'alphabetical');
-    const groupBy = config.get<GroupBy>('groupBy', 'folder');
-
-    // Set context values for menu checkmarks
-    vscode.commands.executeCommand('setContext', 'documentTabs.sortAlphabetical', sortOrder === 'alphabetical');
-    vscode.commands.executeCommand('setContext', 'documentTabs.sortRecentFirst', sortOrder === 'recentlyOpenedFirst');
-    vscode.commands.executeCommand('setContext', 'documentTabs.sortRecentLast', sortOrder === 'recentlyOpenedLast');
-    vscode.commands.executeCommand('setContext', 'documentTabs.groupNone', groupBy === 'none');
-    vscode.commands.executeCommand('setContext', 'documentTabs.groupFolder', groupBy === 'folder');
-    vscode.commands.executeCommand('setContext', 'documentTabs.groupExtension', groupBy === 'extension');
-    vscode.commands.executeCommand('setContext', 'documentTabs.groupProject', groupBy === 'project');
-}
+import { TreeViewItem, isTabItem, getTabUri } from './types';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Document Tabs extension is now active');
@@ -36,8 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Set tree view reference for badge updates
     tabsProvider.setTreeView(treeView);
 
-    // Initial context update and refresh
-    updateMenuContext();
+    // Initial refresh
     tabsProvider.refresh();
 
     // Listen for tab changes
@@ -63,7 +44,6 @@ export function activate(context: vscode.ExtensionContext) {
     // Listen for configuration changes
     const configChangeListener = vscode.workspace.onDidChangeConfiguration((event) => {
         if (event.affectsConfiguration('documentTabs')) {
-            updateMenuContext();
             tabsProvider.refresh();
         }
     });
@@ -71,6 +51,10 @@ export function activate(context: vscode.ExtensionContext) {
     // Register commands
     const refreshCommand = vscode.commands.registerCommand('documentTabs.refresh', () => {
         tabsProvider.refresh();
+    });
+
+    const expandAllCommand = vscode.commands.registerCommand('documentTabs.expandAll', () => {
+        tabsProvider.expandAll();
     });
 
     const openOptionsCommand = vscode.commands.registerCommand('documentTabs.openOptions', () => {
@@ -202,6 +186,7 @@ export function activate(context: vscode.ExtensionContext) {
         tabGroupChangeListener,
         configChangeListener,
         refreshCommand,
+        expandAllCommand,
         openOptionsCommand,
         sortAlphabeticallyCommand,
         sortByRecentlyOpenedFirstCommand,

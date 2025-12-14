@@ -36,7 +36,7 @@
       "document-tabs-container": [
         {
           "id": "documentTabsView",
-          "name": "Tabs",
+          "name": "Document Tabs",
           "icon": "resources/tabs-icon.svg",
           "contextualTitle": "Document Tabs"
         }
@@ -47,6 +47,12 @@
         "command": "documentTabs.refresh",
         "title": "Refresh",
         "icon": "$(refresh)",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.expandAll",
+        "title": "Expand All",
+        "icon": "$(expand-all)",
         "category": "Document Tabs"
       },
       {
@@ -164,9 +170,14 @@
           "group": "navigation@1"
         },
         {
-          "command": "documentTabs.openOptions",
+          "command": "documentTabs.expandAll",
           "when": "view == documentTabsView",
           "group": "navigation@2"
+        },
+        {
+          "command": "documentTabs.openOptions",
+          "when": "view == documentTabsView",
+          "group": "navigation@3"
         },
         {
           "command": "documentTabs.sortAlphabetically",

@@ -106,6 +106,26 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
     }
 
     /**
+     * Expand all groups in the tree view
+     */
+    async expandAll(): Promise<void> {
+        if (!this.treeView) {
+            return;
+        }
+
+        const children = this.getChildren();
+        for (const child of children) {
+            if (isGroupItem(child)) {
+                try {
+                    await this.treeView.reveal(child, { expand: true, select: false, focus: false });
+                } catch {
+                    // Ignore errors if element can't be revealed
+                }
+            }
+        }
+    }
+
+    /**
      * Updates the view badge with tab count
      */
     private updateBadge(): void {
