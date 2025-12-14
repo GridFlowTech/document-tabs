@@ -64,44 +64,72 @@
       {
         "command": "documentTabs.sortAlphabetically",
         "title": "Sort Alphabetically",
-        "category": "Document Tabs",
-        "enablement": "view == documentTabsView"
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.sortAlphabetically.checked",
+        "title": "✓ Sort Alphabetically",
+        "category": "Document Tabs"
       },
       {
         "command": "documentTabs.sortByRecentlyOpenedFirst",
         "title": "Sort by Recently Opened First",
-        "category": "Document Tabs",
-        "enablement": "view == documentTabsView"
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.sortByRecentlyOpenedFirst.checked",
+        "title": "✓ Sort by Recently Opened First",
+        "category": "Document Tabs"
       },
       {
         "command": "documentTabs.sortByRecentlyOpenedLast",
         "title": "Sort by Recently Opened Last",
-        "category": "Document Tabs",
-        "enablement": "view == documentTabsView"
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.sortByRecentlyOpenedLast.checked",
+        "title": "✓ Sort by Recently Opened Last",
+        "category": "Document Tabs"
       },
       {
         "command": "documentTabs.groupByNone",
         "title": "No Grouping",
-        "category": "Document Tabs",
-        "enablement": "view == documentTabsView"
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.groupByNone.checked",
+        "title": "✓ No Grouping",
+        "category": "Document Tabs"
       },
       {
         "command": "documentTabs.groupByFolder",
         "title": "Group by Folder",
-        "category": "Document Tabs",
-        "enablement": "view == documentTabsView"
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.groupByFolder.checked",
+        "title": "✓ Group by Folder",
+        "category": "Document Tabs"
       },
       {
         "command": "documentTabs.groupByExtension",
         "title": "Group by Extension",
-        "category": "Document Tabs",
-        "enablement": "view == documentTabsView"
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.groupByExtension.checked",
+        "title": "✓ Group by Extension",
+        "category": "Document Tabs"
       },
       {
         "command": "documentTabs.groupByProject",
         "title": "Group by Project",
-        "category": "Document Tabs",
-        "enablement": "view == documentTabsView"
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.groupByProject.checked",
+        "title": "✓ Group by Project",
+        "category": "Document Tabs"
       },
       {
         "command": "documentTabs.closeTab",
@@ -175,43 +203,73 @@
           "group": "navigation@2"
         },
         {
-          "command": "documentTabs.openOptions",
-          "when": "view == documentTabsView",
-          "group": "navigation@3"
-        },
-        {
-          "command": "documentTabs.sortAlphabetically",
-          "when": "view == documentTabsView",
+          "command": "documentTabs.sortAlphabetically.checked",
+          "when": "view == documentTabsView && documentTabs.sortOrder == alphabetical",
           "group": "1_sort@1"
         },
         {
-          "command": "documentTabs.sortByRecentlyOpenedFirst",
-          "when": "view == documentTabsView",
+          "command": "documentTabs.sortAlphabetically",
+          "when": "view == documentTabsView && documentTabs.sortOrder != alphabetical",
+          "group": "1_sort@1"
+        },
+        {
+          "command": "documentTabs.sortByRecentlyOpenedFirst.checked",
+          "when": "view == documentTabsView && documentTabs.sortOrder == recentlyOpenedFirst",
           "group": "1_sort@2"
         },
         {
-          "command": "documentTabs.sortByRecentlyOpenedLast",
-          "when": "view == documentTabsView",
+          "command": "documentTabs.sortByRecentlyOpenedFirst",
+          "when": "view == documentTabsView && documentTabs.sortOrder != recentlyOpenedFirst",
+          "group": "1_sort@2"
+        },
+        {
+          "command": "documentTabs.sortByRecentlyOpenedLast.checked",
+          "when": "view == documentTabsView && documentTabs.sortOrder == recentlyOpenedLast",
           "group": "1_sort@3"
         },
         {
-          "command": "documentTabs.groupByNone",
-          "when": "view == documentTabsView",
+          "command": "documentTabs.sortByRecentlyOpenedLast",
+          "when": "view == documentTabsView && documentTabs.sortOrder != recentlyOpenedLast",
+          "group": "1_sort@3"
+        },
+        {
+          "command": "documentTabs.groupByNone.checked",
+          "when": "view == documentTabsView && documentTabs.groupBy == none",
           "group": "2_group@1"
         },
         {
-          "command": "documentTabs.groupByFolder",
-          "when": "view == documentTabsView",
+          "command": "documentTabs.groupByNone",
+          "when": "view == documentTabsView && documentTabs.groupBy != none",
+          "group": "2_group@1"
+        },
+        {
+          "command": "documentTabs.groupByFolder.checked",
+          "when": "view == documentTabsView && documentTabs.groupBy == folder",
           "group": "2_group@2"
         },
         {
-          "command": "documentTabs.groupByExtension",
-          "when": "view == documentTabsView",
+          "command": "documentTabs.groupByFolder",
+          "when": "view == documentTabsView && documentTabs.groupBy != folder",
+          "group": "2_group@2"
+        },
+        {
+          "command": "documentTabs.groupByExtension.checked",
+          "when": "view == documentTabsView && documentTabs.groupBy == extension",
           "group": "2_group@3"
         },
         {
+          "command": "documentTabs.groupByExtension",
+          "when": "view == documentTabsView && documentTabs.groupBy != extension",
+          "group": "2_group@3"
+        },
+        {
+          "command": "documentTabs.groupByProject.checked",
+          "when": "view == documentTabsView && documentTabs.groupBy == project",
+          "group": "2_group@4"
+        },
+        {
           "command": "documentTabs.groupByProject",
-          "when": "view == documentTabsView",
+          "when": "view == documentTabsView && documentTabs.groupBy != project",
           "group": "2_group@4"
         },
         {

@@ -2,8 +2,27 @@ import * as vscode from 'vscode';
 import { DocumentTabsProvider } from './tabsProvider';
 import { TreeViewItem, isTabItem, getTabUri } from './types';
 
+/**
+ * Updates the context keys for sort and group settings.
+ * These context keys are used by 'when' clauses in package.json menus
+ * to conditionally show either the checked or unchecked version of menu items,
+ * providing visual feedback for the currently selected options.
+ */
+function updateContextKeys() {
+    const config = vscode.workspace.getConfiguration('documentTabs');
+    const sortOrder = config.get<string>('sortOrder', 'alphabetical');
+    const groupBy = config.get<string>('groupBy', 'none');
+
+    // Set context keys for menu checkmarks
+    vscode.commands.executeCommand('setContext', 'documentTabs.sortOrder', sortOrder);
+    vscode.commands.executeCommand('setContext', 'documentTabs.groupBy', groupBy);
+}
+
 export function activate(context: vscode.ExtensionContext) {
     console.log('Document Tabs extension is now active');
+
+    // Set initial context keys for menu checkmarks
+    updateContextKeys();
 
     // Create the tree data provider
     const tabsProvider = new DocumentTabsProvider(context);
@@ -44,6 +63,8 @@ export function activate(context: vscode.ExtensionContext) {
     // Listen for configuration changes
     const configChangeListener = vscode.workspace.onDidChangeConfiguration((event) => {
         if (event.affectsConfiguration('documentTabs')) {
+            // Update context keys for menu checkmarks
+            updateContextKeys();
             tabsProvider.refresh();
         }
     });
@@ -65,12 +86,21 @@ export function activate(context: vscode.ExtensionContext) {
     const sortAlphabeticallyCommand = vscode.commands.registerCommand('documentTabs.sortAlphabetically', async () => {
         await vscode.workspace.getConfiguration('documentTabs').update('sortOrder', 'alphabetical', true);
     });
+    const sortAlphabeticallyCheckedCommand = vscode.commands.registerCommand('documentTabs.sortAlphabetically.checked', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('sortOrder', 'alphabetical', true);
+    });
 
     const sortByRecentlyOpenedFirstCommand = vscode.commands.registerCommand('documentTabs.sortByRecentlyOpenedFirst', async () => {
         await vscode.workspace.getConfiguration('documentTabs').update('sortOrder', 'recentlyOpenedFirst', true);
     });
+    const sortByRecentlyOpenedFirstCheckedCommand = vscode.commands.registerCommand('documentTabs.sortByRecentlyOpenedFirst.checked', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('sortOrder', 'recentlyOpenedFirst', true);
+    });
 
     const sortByRecentlyOpenedLastCommand = vscode.commands.registerCommand('documentTabs.sortByRecentlyOpenedLast', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('sortOrder', 'recentlyOpenedLast', true);
+    });
+    const sortByRecentlyOpenedLastCheckedCommand = vscode.commands.registerCommand('documentTabs.sortByRecentlyOpenedLast.checked', async () => {
         await vscode.workspace.getConfiguration('documentTabs').update('sortOrder', 'recentlyOpenedLast', true);
     });
 
@@ -78,16 +108,28 @@ export function activate(context: vscode.ExtensionContext) {
     const groupByNoneCommand = vscode.commands.registerCommand('documentTabs.groupByNone', async () => {
         await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'none', true);
     });
+    const groupByNoneCheckedCommand = vscode.commands.registerCommand('documentTabs.groupByNone.checked', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'none', true);
+    });
 
     const groupByFolderCommand = vscode.commands.registerCommand('documentTabs.groupByFolder', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'folder', true);
+    });
+    const groupByFolderCheckedCommand = vscode.commands.registerCommand('documentTabs.groupByFolder.checked', async () => {
         await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'folder', true);
     });
 
     const groupByExtensionCommand = vscode.commands.registerCommand('documentTabs.groupByExtension', async () => {
         await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'extension', true);
     });
+    const groupByExtensionCheckedCommand = vscode.commands.registerCommand('documentTabs.groupByExtension.checked', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'extension', true);
+    });
 
     const groupByProjectCommand = vscode.commands.registerCommand('documentTabs.groupByProject', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'project', true);
+    });
+    const groupByProjectCheckedCommand = vscode.commands.registerCommand('documentTabs.groupByProject.checked', async () => {
         await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'project', true);
     });
 
@@ -189,12 +231,19 @@ export function activate(context: vscode.ExtensionContext) {
         expandAllCommand,
         openOptionsCommand,
         sortAlphabeticallyCommand,
+        sortAlphabeticallyCheckedCommand,
         sortByRecentlyOpenedFirstCommand,
+        sortByRecentlyOpenedFirstCheckedCommand,
         sortByRecentlyOpenedLastCommand,
+        sortByRecentlyOpenedLastCheckedCommand,
         groupByNoneCommand,
+        groupByNoneCheckedCommand,
         groupByFolderCommand,
+        groupByFolderCheckedCommand,
         groupByExtensionCommand,
+        groupByExtensionCheckedCommand,
         groupByProjectCommand,
+        groupByProjectCheckedCommand,
         closeTabCommand,
         closeOtherTabsCommand,
         closeTabsToTheRightCommand,

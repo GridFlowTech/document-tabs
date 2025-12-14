@@ -134,6 +134,61 @@ export function getWorkspaceFolder(uri: vscode.Uri): string {
 const projectFolderCache = new Map<string, string>();
 
 /**
+ * Scans a directory for project files and returns the project name
+ */
+async function findProjectFileInDirectory(dirPath: string): Promise<string | null> {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+
+        if (!fs.existsSync(dirPath)) {
+            return null;
+        }
+
+        const files = fs.readdirSync(dirPath);
+
+        // Look for .csproj, .fsproj, .vbproj files first
+        for (const file of files) {
+            if (file.endsWith('.csproj') || file.endsWith('.fsproj') || file.endsWith('.vbproj')) {
+                // Return the project name without extension
+                return file.replace(/\.(csproj|fsproj|vbproj)$/, '');
+            }
+        }
+
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Synchronously scans a directory for project files and returns the project name
+ */
+function findProjectFileInDirectorySync(dirPath: string): string | null {
+    try {
+        const fs = require('fs');
+
+        if (!fs.existsSync(dirPath)) {
+            return null;
+        }
+
+        const files = fs.readdirSync(dirPath);
+
+        // Look for .csproj, .fsproj, .vbproj files first
+        for (const file of files) {
+            if (file.endsWith('.csproj') || file.endsWith('.fsproj') || file.endsWith('.vbproj')) {
+                // Return the project name without extension
+                return file.replace(/\.(csproj|fsproj|vbproj)$/, '');
+            }
+        }
+
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+/**
  * Gets the project folder for a URI by finding the nearest folder containing a project file
  * (.csproj, .fsproj, .vbproj, package.json, etc.)
  */
@@ -143,55 +198,40 @@ export function getProjectFolder(uri: vscode.Uri): string {
         return 'External';
     }
 
-    // Get the directory path of the file
     const filePath = uri.fsPath;
-    const workspacePath = workspaceFolder.uri.fsPath;
-    
+    const path = require('path');
+
     // Check cache first
     const cacheKey = filePath;
     if (projectFolderCache.has(cacheKey)) {
         return projectFolderCache.get(cacheKey)!;
     }
 
-    // Get relative path and split into parts
+    // Get the directory of the file and walk upward to find a .csproj file
+    let currentDir = path.dirname(filePath);
+    const workspacePath = workspaceFolder.uri.fsPath;
+
+    while (currentDir && currentDir.length >= workspacePath.length) {
+        const projectName = findProjectFileInDirectorySync(currentDir);
+
+        if (projectName) {
+            projectFolderCache.set(cacheKey, projectName);
+            return projectName;
+        }
+
+        // Move up one directory
+        const parentDir = path.dirname(currentDir);
+        if (parentDir === currentDir) {
+            break; // Reached root
+        }
+        currentDir = parentDir;
+    }
+
+    // Fallback: use the first meaningful folder in the relative path
     const relativePath = vscode.workspace.asRelativePath(uri, false);
     const pathParts = relativePath.split(/[/\\]/);
-    
-    // Remove the filename to get directory parts
     const dirParts = pathParts.slice(0, -1);
-    
-    // Walk through the path from the file's directory upward
-    // Look for the folder name that likely represents a project
-    for (let i = dirParts.length - 1; i >= 0; i--) {
-        const folderName = dirParts[i];
-        
-        // Skip common non-project folders
-        const skipFolders = ['bin', 'obj', 'debug', 'release', 'node_modules', 'dist', 'out', 'build', 
-                           '.vs', '.git', 'properties', 'wwwroot', 'controllers', 'models', 'views',
-                           'services', 'repositories', 'data', 'entities', 'dtos', 'interfaces',
-                           'migrations', 'configurations', 'helpers', 'extensions', 'middleware'];
-        
-        if (skipFolders.includes(folderName.toLowerCase())) {
-            continue;
-        }
-        
-        // Check if this folder name looks like a project name
-        // Common patterns: ends with .Api, .Core, .Domain, .Infrastructure, .Service, etc.
-        // Or contains a dot suggesting it's a namespaced project name
-        const projectPatterns = [
-            /\.(Api|Core|Domain|Infrastructure|Service|Services|Application|Web|Tests|Common|Data|Models|Shared|Client|Server|Contracts|Business|Logic|Repository|Repositories|Handlers|Commands|Queries|Events)$/i,
-            /^[A-Z][a-zA-Z0-9]*\.[A-Z][a-zA-Z0-9]*/, // Pattern like "Users.Api", "Company.Project"
-        ];
-        
-        for (const pattern of projectPatterns) {
-            if (pattern.test(folderName)) {
-                projectFolderCache.set(cacheKey, folderName);
-                return folderName;
-            }
-        }
-    }
-    
-    // If no pattern matched, use the first meaningful folder after common root folders
+
     for (const folderName of dirParts) {
         const rootFolders = ['src', 'source', 'lib', 'libs', 'packages', 'projects', 'apps', 'modules'];
         if (!rootFolders.includes(folderName.toLowerCase()) && folderName.length > 0) {
@@ -199,7 +239,7 @@ export function getProjectFolder(uri: vscode.Uri): string {
             return folderName;
         }
     }
-    
+
     // Fallback to workspace folder name
     const result = workspaceFolder.name;
     projectFolderCache.set(cacheKey, result);
