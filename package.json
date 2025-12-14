@@ -1,0 +1,369 @@
+{
+  "name": "document-tabs",
+  "displayName": "Document Tabs",
+  "description": "A Visual Studio-style vertical tab grouping view for VS Code. Shows currently open tabs in a sidebar with grouping, sorting, and tab management features.",
+  "version": "1.0.0",
+  "publisher": "gridflowtech",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "tabs",
+    "document tabs",
+    "vertical tabs",
+    "tab groups",
+    "tab management"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "icon": "resources/icon.png",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "document-tabs-container",
+          "title": "Document Tabs",
+          "icon": "resources/tabs-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "document-tabs-container": [
+        {
+          "id": "documentTabsView",
+          "name": "Tabs",
+          "icon": "resources/tabs-icon.svg",
+          "contextualTitle": "Document Tabs"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "documentTabs.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.openOptions",
+        "title": "Options...",
+        "icon": "$(gear)",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.sortAlphabetically",
+        "title": "Sort Alphabetically",
+        "category": "Document Tabs",
+        "enablement": "view == documentTabsView"
+      },
+      {
+        "command": "documentTabs.sortByRecentlyOpenedFirst",
+        "title": "Sort by Recently Opened First",
+        "category": "Document Tabs",
+        "enablement": "view == documentTabsView"
+      },
+      {
+        "command": "documentTabs.sortByRecentlyOpenedLast",
+        "title": "Sort by Recently Opened Last",
+        "category": "Document Tabs",
+        "enablement": "view == documentTabsView"
+      },
+      {
+        "command": "documentTabs.groupByNone",
+        "title": "No Grouping",
+        "category": "Document Tabs",
+        "enablement": "view == documentTabsView"
+      },
+      {
+        "command": "documentTabs.groupByFolder",
+        "title": "Group by Folder",
+        "category": "Document Tabs",
+        "enablement": "view == documentTabsView"
+      },
+      {
+        "command": "documentTabs.groupByExtension",
+        "title": "Group by Extension",
+        "category": "Document Tabs",
+        "enablement": "view == documentTabsView"
+      },
+      {
+        "command": "documentTabs.groupByProject",
+        "title": "Group by Project",
+        "category": "Document Tabs",
+        "enablement": "view == documentTabsView"
+      },
+      {
+        "command": "documentTabs.closeTab",
+        "title": "Close",
+        "icon": "$(close)",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.closeOtherTabs",
+        "title": "Close Others",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.closeTabsToTheRight",
+        "title": "Close Tabs to the Right",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.closeTabsInGroup",
+        "title": "Close All in Group",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.closeAllTabs",
+        "title": "Close All Tabs",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.pinTab",
+        "title": "Pin Tab",
+        "icon": "$(pin)",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.unpinTab",
+        "title": "Unpin Tab",
+        "icon": "$(pinned)",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.copyPath",
+        "title": "Copy Path",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.copyRelativePath",
+        "title": "Copy Relative Path",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.revealInExplorer",
+        "title": "Reveal in Explorer",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.openToSide",
+        "title": "Open to the Side",
+        "category": "Document Tabs"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "documentTabs.refresh",
+          "when": "view == documentTabsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "documentTabs.openOptions",
+          "when": "view == documentTabsView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "documentTabs.sortAlphabetically",
+          "when": "view == documentTabsView",
+          "group": "1_sort@1"
+        },
+        {
+          "command": "documentTabs.sortByRecentlyOpenedFirst",
+          "when": "view == documentTabsView",
+          "group": "1_sort@2"
+        },
+        {
+          "command": "documentTabs.sortByRecentlyOpenedLast",
+          "when": "view == documentTabsView",
+          "group": "1_sort@3"
+        },
+        {
+          "command": "documentTabs.groupByNone",
+          "when": "view == documentTabsView",
+          "group": "2_group@1"
+        },
+        {
+          "command": "documentTabs.groupByFolder",
+          "when": "view == documentTabsView",
+          "group": "2_group@2"
+        },
+        {
+          "command": "documentTabs.groupByExtension",
+          "when": "view == documentTabsView",
+          "group": "2_group@3"
+        },
+        {
+          "command": "documentTabs.groupByProject",
+          "when": "view == documentTabsView",
+          "group": "2_group@4"
+        },
+        {
+          "command": "documentTabs.closeAllTabs",
+          "when": "view == documentTabsView",
+          "group": "3_actions@1"
+        },
+        {
+          "command": "documentTabs.openOptions",
+          "when": "view == documentTabsView",
+          "group": "4_options@1"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "documentTabs.closeTab",
+          "when": "view == documentTabsView && viewItem == tab",
+          "group": "inline@1"
+        },
+        {
+          "command": "documentTabs.pinTab",
+          "when": "view == documentTabsView && viewItem == tab",
+          "group": "inline@2"
+        },
+        {
+          "command": "documentTabs.unpinTab",
+          "when": "view == documentTabsView && viewItem == pinnedTab",
+          "group": "inline@2"
+        },
+        {
+          "command": "documentTabs.closeTab",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "1_close@1"
+        },
+        {
+          "command": "documentTabs.closeOtherTabs",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "1_close@2"
+        },
+        {
+          "command": "documentTabs.closeTabsToTheRight",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "1_close@3"
+        },
+        {
+          "command": "documentTabs.closeTabsInGroup",
+          "when": "view == documentTabsView && viewItem == group",
+          "group": "1_close@1"
+        },
+        {
+          "command": "documentTabs.pinTab",
+          "when": "view == documentTabsView && viewItem == tab",
+          "group": "2_pin@1"
+        },
+        {
+          "command": "documentTabs.unpinTab",
+          "when": "view == documentTabsView && viewItem == pinnedTab",
+          "group": "2_pin@1"
+        },
+        {
+          "command": "documentTabs.openToSide",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "3_open@1"
+        },
+        {
+          "command": "documentTabs.copyPath",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "4_copy@1"
+        },
+        {
+          "command": "documentTabs.copyRelativePath",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "4_copy@2"
+        },
+        {
+          "command": "documentTabs.revealInExplorer",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "5_reveal@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Document Tabs",
+      "properties": {
+        "documentTabs.sortOrder": {
+          "type": "string",
+          "default": "alphabetical",
+          "enum": [
+            "alphabetical",
+            "recentlyOpenedFirst",
+            "recentlyOpenedLast"
+          ],
+          "enumDescriptions": [
+            "Sort tabs alphabetically by file name",
+            "Sort tabs with most recently opened first",
+            "Sort tabs with most recently opened last"
+          ],
+          "description": "How to sort the tabs in the view"
+        },
+        "documentTabs.groupBy": {
+          "type": "string",
+          "default": "folder",
+          "enum": [
+            "none",
+            "folder",
+            "extension",
+            "project"
+          ],
+          "enumDescriptions": [
+            "No grouping - show all tabs in a flat list",
+            "Group tabs by their parent folder",
+            "Group tabs by their file extension",
+            "Group tabs by workspace folder / project"
+          ],
+          "description": "How to group the tabs in the view"
+        },
+        "documentTabs.showPinnedSeparately": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show pinned tabs in a separate group at the top"
+        },
+        "documentTabs.showTabCount": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the number of tabs in the view title"
+        },
+        "documentTabs.showDirtyIndicator": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show an indicator for unsaved files"
+        },
+        "documentTabs.showFileIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show file icons next to tab names"
+        },
+        "documentTabs.showPath": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show file path in tab description"
+        },
+        "documentTabs.collapseGroupsByDefault": {
+          "type": "boolean",
+          "default": false,
+          "description": "Collapse all groups by default"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.2"
+  }
+}
