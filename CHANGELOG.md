@@ -25,4 +25,4 @@ All notable changes to the "Document Tabs" extension will be documented in this 
 - Real-time sync with VS Code tab state
 - File icons and dirty indicators
 - Tab count badge on view
-- Expand\Collapse All action in the view title
+- Expand All action in the view title
