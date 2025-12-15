@@ -2,6 +2,8 @@
 
 A Visual Studio-style vertical tab grouping view for VS Code. This extension provides a custom sidebar view showing all currently open tabs with powerful grouping, sorting, and tab management features.
 
+![Document Tabs view menu](assets/document-tabs-view-menu.png)
+
 ## Features
 
 ### 📁 Tab Grouping

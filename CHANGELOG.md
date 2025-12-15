@@ -26,3 +26,9 @@ All notable changes to the "Document Tabs" extension will be documented in this 
 - File icons and dirty indicators
 - Tab count badge on view
 - Expand All action in the view title
+
+## [1.0.1] - 2025-12-14
+
+### Added
+
+- README screenshot for Marketplace/GitHub
