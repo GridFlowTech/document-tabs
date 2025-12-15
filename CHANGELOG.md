@@ -2,7 +2,7 @@
 
 All notable changes to the "Document Tabs" extension will be documented in this file.
 
-## [1.0.0] - 2024-12-14
+## [1.0.0] - 2025-12-14
 
 ### Added
 
@@ -25,3 +25,4 @@ All notable changes to the "Document Tabs" extension will be documented in this 
 - Real-time sync with VS Code tab state
 - File icons and dirty indicators
 - Tab count badge on view
+- Expand\Collapse All action in the view title

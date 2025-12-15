@@ -30,8 +30,18 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
     private orderCounter: number = 0;
     private treeView: vscode.TreeView<TreeViewItem> | undefined;
 
+    private cachedAllTabs: TabItem[] | undefined;
+    private cachedRootChildren: TreeViewItem[] | undefined;
+    private cachedRootChildrenSignature: string | undefined;
+
     constructor(private context: vscode.ExtensionContext) {
         this.initializeTabOrder();
+    }
+
+    private invalidateCache(): void {
+        this.cachedAllTabs = undefined;
+        this.cachedRootChildren = undefined;
+        this.cachedRootChildrenSignature = undefined;
     }
 
     /**
@@ -66,6 +76,10 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
                 this.tabOpenOrder.set(uri.toString(), this.orderCounter++);
             }
         }
+
+        if (tabs.length > 0) {
+            this.invalidateCache();
+        }
     }
 
     /**
@@ -77,6 +91,10 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
             if (uri) {
                 this.tabOpenOrder.delete(uri.toString());
             }
+        }
+
+        if (tabs.length > 0) {
+            this.invalidateCache();
         }
     }
 
@@ -101,6 +119,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
      * Refresh the tree view
      */
     refresh(): void {
+        this.invalidateCache();
         this._onDidChangeTreeData.fire();
         this.updateBadge();
     }
@@ -150,6 +169,10 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
      * Get all tabs from all tab groups
      */
     private getAllTabs(): TabItem[] {
+        if (this.cachedAllTabs) {
+            return this.cachedAllTabs;
+        }
+
         const tabs: TabItem[] = [];
 
         for (const group of vscode.window.tabGroups.all) {
@@ -170,6 +193,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
             }
         }
 
+        this.cachedAllTabs = tabs;
         return tabs;
     }
 
@@ -308,6 +332,11 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
         const config = this.getConfig();
 
         if (!element) {
+            const signature = `${config.sortOrder}|${config.groupBy}|${config.showPinnedSeparately ? 1 : 0}|${config.collapseGroupsByDefault ? 1 : 0}`;
+            if (this.cachedRootChildren && this.cachedRootChildrenSignature === signature) {
+                return this.cachedRootChildren;
+            }
+
             // Root level
             let tabs = this.getAllTabs();
             tabs = this.sortTabs(tabs);
@@ -330,7 +359,10 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
 
                 if (config.groupBy === 'none') {
                     // No grouping - return tabs directly (with pinned group if any)
-                    return [...result, ...unpinnedTabs];
+                    const rootChildren = [...result, ...unpinnedTabs];
+                    this.cachedRootChildren = rootChildren;
+                    this.cachedRootChildrenSignature = signature;
+                    return rootChildren;
                 }
 
                 // Group unpinned tabs
@@ -349,11 +381,15 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
                     });
                 }
 
+                this.cachedRootChildren = result;
+                this.cachedRootChildrenSignature = signature;
                 return result;
             }
 
             // No separate pinned handling
             if (config.groupBy === 'none') {
+                this.cachedRootChildren = tabs;
+                this.cachedRootChildrenSignature = signature;
                 return tabs;
             }
 
@@ -361,7 +397,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
             const groups = this.groupTabs(tabs);
             const sortedGroupNames = Array.from(groups.keys()).sort();
 
-            return sortedGroupNames.map(groupName => ({
+            const rootChildren = sortedGroupNames.map(groupName => ({
                 type: 'group' as const,
                 name: groupName || 'Other',
                 tabs: groups.get(groupName)!,
@@ -369,6 +405,10 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
                     ? vscode.TreeItemCollapsibleState.Collapsed
                     : vscode.TreeItemCollapsibleState.Expanded
             }));
+
+            this.cachedRootChildren = rootChildren;
+            this.cachedRootChildrenSignature = signature;
+            return rootChildren;
         }
 
         // Children of a group

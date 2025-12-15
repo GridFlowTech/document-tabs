@@ -8,7 +8,7 @@ A Visual Studio-style vertical tab grouping view for VS Code. This extension pro
 
 - **Group by Folder** - Organize tabs by their parent folder
 - **Group by Extension** - Organize tabs by file type (.ts, .js, .css, etc.)
-- **Group by Project** - Organize tabs by workspace folder
+- **Group by Project** - Organize tabs by detected project (best-effort)
 - **No Grouping** - Show a flat list of all tabs
 
 ### 🔤 Tab Sorting
@@ -47,11 +47,11 @@ A Visual Studio-style vertical tab grouping view for VS Code. This extension pro
 2. View all your open tabs organized in the sidebar
 3. Click any tab to open it in the editor
 4. Right-click for context menu actions
-5. Use the gear icon (⚙️) for sorting and grouping options
+5. Use the view title actions/menu for sorting, grouping, refresh, and **Expand All**
 
 ## Configuration
 
-Open **Settings** and search for "Document Tabs" or click the gear icon in the view title.
+Open **Settings** and search for "Document Tabs", or run **Document Tabs: Options...** from the Command Palette.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
@@ -77,6 +77,7 @@ You can assign keyboard shortcuts to Document Tabs commands:
 All commands are available in the Command Palette (Ctrl+Shift+P):
 
 - `Document Tabs: Refresh`
+- `Document Tabs: Expand All`
 - `Document Tabs: Options...`
 - `Document Tabs: Sort Alphabetically`
 - `Document Tabs: Sort by Recently Opened First`

@@ -40,6 +40,19 @@ export function activate(context: vscode.ExtensionContext) {
     // Initial refresh
     tabsProvider.refresh();
 
+    // Coalesce multiple refresh triggers that can fire back-to-back
+    let refreshPending = false;
+    const scheduleRefresh = () => {
+        if (refreshPending) {
+            return;
+        }
+        refreshPending = true;
+        setTimeout(() => {
+            refreshPending = false;
+            tabsProvider.refresh();
+        }, 0);
+    };
+
     // Listen for tab changes
     const tabChangeListener = vscode.window.tabGroups.onDidChangeTabs((event) => {
         // Track newly opened tabs
@@ -52,12 +65,12 @@ export function activate(context: vscode.ExtensionContext) {
             tabsProvider.removeClosedTabs(event.closed);
         }
 
-        tabsProvider.refresh();
+        scheduleRefresh();
     });
 
     // Listen for tab group changes
     const tabGroupChangeListener = vscode.window.tabGroups.onDidChangeTabGroups(() => {
-        tabsProvider.refresh();
+        scheduleRefresh();
     });
 
     // Listen for configuration changes
@@ -65,13 +78,13 @@ export function activate(context: vscode.ExtensionContext) {
         if (event.affectsConfiguration('documentTabs')) {
             // Update context keys for menu checkmarks
             updateContextKeys();
-            tabsProvider.refresh();
+            scheduleRefresh();
         }
     });
 
     // Register commands
     const refreshCommand = vscode.commands.registerCommand('documentTabs.refresh', () => {
-        tabsProvider.refresh();
+        scheduleRefresh();
     });
 
     const expandAllCommand = vscode.commands.registerCommand('documentTabs.expandAll', () => {
@@ -181,7 +194,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Open the file first to ensure it's active, then pin
             await vscode.window.showTextDocument(item.uri, { preview: false });
             await vscode.commands.executeCommand('workbench.action.pinEditor');
-            tabsProvider.refresh();
+            scheduleRefresh();
         }
     });
 
@@ -190,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Open the file first to ensure it's active, then unpin
             await vscode.window.showTextDocument(item.uri, { preview: false });
             await vscode.commands.executeCommand('workbench.action.unpinEditor');
-            tabsProvider.refresh();
+            scheduleRefresh();
         }
     });
 

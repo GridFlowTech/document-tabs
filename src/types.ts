@@ -134,34 +134,6 @@ export function getWorkspaceFolder(uri: vscode.Uri): string {
 const projectFolderCache = new Map<string, string>();
 
 /**
- * Scans a directory for project files and returns the project name
- */
-async function findProjectFileInDirectory(dirPath: string): Promise<string | null> {
-    try {
-        const fs = require('fs');
-        const path = require('path');
-
-        if (!fs.existsSync(dirPath)) {
-            return null;
-        }
-
-        const files = fs.readdirSync(dirPath);
-
-        // Look for .csproj, .fsproj, .vbproj files first
-        for (const file of files) {
-            if (file.endsWith('.csproj') || file.endsWith('.fsproj') || file.endsWith('.vbproj')) {
-                // Return the project name without extension
-                return file.replace(/\.(csproj|fsproj|vbproj)$/, '');
-            }
-        }
-
-        return null;
-    } catch {
-        return null;
-    }
-}
-
-/**
  * Synchronously scans a directory for project files and returns the project name
  */
 function findProjectFileInDirectorySync(dirPath: string): string | null {
@@ -201,14 +173,16 @@ export function getProjectFolder(uri: vscode.Uri): string {
     const filePath = uri.fsPath;
     const path = require('path');
 
+    const startingDir = path.dirname(filePath);
+
     // Check cache first
-    const cacheKey = filePath;
+    const cacheKey = startingDir;
     if (projectFolderCache.has(cacheKey)) {
         return projectFolderCache.get(cacheKey)!;
     }
 
     // Get the directory of the file and walk upward to find a .csproj file
-    let currentDir = path.dirname(filePath);
+    let currentDir = startingDir;
     const workspacePath = workspaceFolder.uri.fsPath;
 
     while (currentDir && currentDir.length >= workspacePath.length) {
