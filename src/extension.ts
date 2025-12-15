@@ -12,10 +12,12 @@ function updateContextKeys() {
     const config = vscode.workspace.getConfiguration('documentTabs');
     const sortOrder = config.get<string>('sortOrder', 'alphabetical');
     const groupBy = config.get<string>('groupBy', 'none');
+    const colorBy = config.get<string>('colorBy', 'none');
 
     // Set context keys for menu checkmarks
     vscode.commands.executeCommand('setContext', 'documentTabs.sortOrder', sortOrder);
     vscode.commands.executeCommand('setContext', 'documentTabs.groupBy', groupBy);
+    vscode.commands.executeCommand('setContext', 'documentTabs.colorBy', colorBy);
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -146,6 +148,115 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'project', true);
     });
 
+    // Color-by commands
+    const colorByNoneCommand = vscode.commands.registerCommand('documentTabs.colorByNone', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('colorBy', 'none', true);
+    });
+    const colorByNoneCheckedCommand = vscode.commands.registerCommand('documentTabs.colorByNone.checked', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('colorBy', 'none', true);
+    });
+
+    const colorByProjectCommand = vscode.commands.registerCommand('documentTabs.colorByProject', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('colorBy', 'project', true);
+    });
+    const colorByProjectCheckedCommand = vscode.commands.registerCommand('documentTabs.colorByProject.checked', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('colorBy', 'project', true);
+    });
+
+    const colorByExtensionCommand = vscode.commands.registerCommand('documentTabs.colorByExtension', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('colorBy', 'extension', true);
+    });
+    const colorByExtensionCheckedCommand = vscode.commands.registerCommand('documentTabs.colorByExtension.checked', async () => {
+        await vscode.workspace.getConfiguration('documentTabs').update('colorBy', 'extension', true);
+    });
+
+    // Manual Set Tab Color commands (applies to Document Tabs view items)
+    const setTabColorNoneCommand = vscode.commands.registerCommand('documentTabs.setTabColor.none', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.clearManualTabColor(item.uri);
+        }
+    });
+    const setTabColorLavenderCommand = vscode.commands.registerCommand('documentTabs.setTabColor.lavender', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'lavender');
+        }
+    });
+    const setTabColorGoldCommand = vscode.commands.registerCommand('documentTabs.setTabColor.gold', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'gold');
+        }
+    });
+    const setTabColorCyanCommand = vscode.commands.registerCommand('documentTabs.setTabColor.cyan', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'cyan');
+        }
+    });
+    const setTabColorBurgundyCommand = vscode.commands.registerCommand('documentTabs.setTabColor.burgundy', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'burgundy');
+        }
+    });
+    const setTabColorGreenCommand = vscode.commands.registerCommand('documentTabs.setTabColor.green', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'green');
+        }
+    });
+    const setTabColorBrownCommand = vscode.commands.registerCommand('documentTabs.setTabColor.brown', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'brown');
+        }
+    });
+    const setTabColorRoyalBlueCommand = vscode.commands.registerCommand('documentTabs.setTabColor.royalBlue', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'royalBlue');
+        }
+    });
+    const setTabColorPumpkinCommand = vscode.commands.registerCommand('documentTabs.setTabColor.pumpkin', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'pumpkin');
+        }
+    });
+    const setTabColorGrayCommand = vscode.commands.registerCommand('documentTabs.setTabColor.gray', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'gray');
+        }
+    });
+    const setTabColorVoltCommand = vscode.commands.registerCommand('documentTabs.setTabColor.volt', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'volt');
+        }
+    });
+    const setTabColorTealCommand = vscode.commands.registerCommand('documentTabs.setTabColor.teal', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'teal');
+        }
+    });
+    const setTabColorMagentaCommand = vscode.commands.registerCommand('documentTabs.setTabColor.magenta', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'magenta');
+        }
+    });
+    const setTabColorMintCommand = vscode.commands.registerCommand('documentTabs.setTabColor.mint', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'mint');
+        }
+    });
+    const setTabColorDarkBrownCommand = vscode.commands.registerCommand('documentTabs.setTabColor.darkBrown', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'darkBrown');
+        }
+    });
+    const setTabColorBlueCommand = vscode.commands.registerCommand('documentTabs.setTabColor.blue', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'blue');
+        }
+    });
+    const setTabColorPinkCommand = vscode.commands.registerCommand('documentTabs.setTabColor.pink', async (item: TreeViewItem) => {
+        if (isTabItem(item)) {
+            await tabsProvider.setManualTabColorByName(item.uri, 'pink');
+        }
+    });
+
     // Tab action commands
     const closeTabCommand = vscode.commands.registerCommand('documentTabs.closeTab', async (item: TreeViewItem) => {
         if (isTabItem(item)) {
@@ -257,6 +368,29 @@ export function activate(context: vscode.ExtensionContext) {
         groupByExtensionCheckedCommand,
         groupByProjectCommand,
         groupByProjectCheckedCommand,
+        colorByNoneCommand,
+        colorByNoneCheckedCommand,
+        colorByProjectCommand,
+        colorByProjectCheckedCommand,
+        colorByExtensionCommand,
+        colorByExtensionCheckedCommand,
+        setTabColorNoneCommand,
+        setTabColorLavenderCommand,
+        setTabColorGoldCommand,
+        setTabColorCyanCommand,
+        setTabColorBurgundyCommand,
+        setTabColorGreenCommand,
+        setTabColorBrownCommand,
+        setTabColorRoyalBlueCommand,
+        setTabColorPumpkinCommand,
+        setTabColorGrayCommand,
+        setTabColorVoltCommand,
+        setTabColorTealCommand,
+        setTabColorMagentaCommand,
+        setTabColorMintCommand,
+        setTabColorDarkBrownCommand,
+        setTabColorBlueCommand,
+        setTabColorPinkCommand,
         closeTabCommand,
         closeOtherTabsCommand,
         closeTabsToTheRightCommand,

@@ -11,11 +11,39 @@ export type SortOrder = 'alphabetical' | 'recentlyOpenedFirst' | 'recentlyOpened
 export type GroupBy = 'none' | 'folder' | 'extension' | 'project';
 
 /**
+ * Represents how tabs should be colorized in the Document Tabs view.
+ */
+export type ColorBy = 'none' | 'project' | 'extension';
+
+/**
+ * Supported manual tab colors.
+ */
+export type TabColorName =
+    | 'none'
+    | 'lavender'
+    | 'gold'
+    | 'cyan'
+    | 'burgundy'
+    | 'green'
+    | 'brown'
+    | 'royalBlue'
+    | 'pumpkin'
+    | 'gray'
+    | 'volt'
+    | 'teal'
+    | 'magenta'
+    | 'mint'
+    | 'darkBrown'
+    | 'blue'
+    | 'pink';
+
+/**
  * Configuration interface for Document Tabs extension
  */
 export interface DocumentTabsConfig {
     sortOrder: SortOrder;
     groupBy: GroupBy;
+    colorBy: ColorBy;
     showPinnedSeparately: boolean;
     showTabCount: boolean;
     showDirtyIndicator: boolean;

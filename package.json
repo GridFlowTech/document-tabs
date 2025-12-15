@@ -2,7 +2,7 @@
   "name": "document-tabs",
   "displayName": "Document Tabs",
   "description": "A Visual Studio-style vertical tab grouping view for VS Code. Shows currently open tabs in a sidebar with grouping, sorting, and tab management features.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "publisher": "GridFlowTech",
   "engines": {
@@ -27,6 +27,16 @@
   "main": "./out/extension.js",
   "icon": "resources/icon.png",
   "contributes": {
+    "submenus": [
+      {
+        "id": "documentTabs.colorBySubmenu",
+        "label": "Color Document Tabs by"
+      },
+      {
+        "id": "documentTabs.setTabColorSubmenu",
+        "label": "Set Tab Color"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -191,6 +201,121 @@
         "command": "documentTabs.openToSide",
         "title": "Open to the Side",
         "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.colorByProject",
+        "title": "Project",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.colorByProject.checked",
+        "title": "✓ Project",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.colorByExtension",
+        "title": "File Extension",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.colorByExtension.checked",
+        "title": "✓ File Extension",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.colorByNone",
+        "title": "No Coloring",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.colorByNone.checked",
+        "title": "✓ No Coloring",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.none",
+        "title": "None",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.lavender",
+        "title": "Lavender",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.gold",
+        "title": "Gold",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.cyan",
+        "title": "Cyan",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.burgundy",
+        "title": "Burgundy",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.green",
+        "title": "Green",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.brown",
+        "title": "Brown",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.royalBlue",
+        "title": "Royal Blue",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.pumpkin",
+        "title": "Pumpkin",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.gray",
+        "title": "Gray",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.volt",
+        "title": "Volt",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.teal",
+        "title": "Teal",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.magenta",
+        "title": "Magenta",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.mint",
+        "title": "Mint",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.darkBrown",
+        "title": "Dark Brown",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.blue",
+        "title": "Blue",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.setTabColor.pink",
+        "title": "Pink",
+        "category": "Document Tabs"
       }
     ],
     "menus": {
@@ -276,6 +401,11 @@
           "group": "2_group@4"
         },
         {
+          "submenu": "documentTabs.colorBySubmenu",
+          "when": "view == documentTabsView",
+          "group": "3_actions@0"
+        },
+        {
           "command": "documentTabs.closeAllTabs",
           "when": "view == documentTabsView",
           "group": "3_actions@1"
@@ -333,6 +463,11 @@
           "group": "2_pin@1"
         },
         {
+          "submenu": "documentTabs.setTabColorSubmenu",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "group": "2_pin@2"
+        },
+        {
           "command": "documentTabs.openToSide",
           "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
           "group": "3_open@1"
@@ -351,6 +486,125 @@
           "command": "documentTabs.revealInExplorer",
           "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
           "group": "5_reveal@1"
+        }
+      ],
+      "documentTabs.colorBySubmenu": [
+        {
+          "command": "documentTabs.colorByProject.checked",
+          "when": "view == documentTabsView && documentTabs.colorBy == project",
+          "group": "1_color@1"
+        },
+        {
+          "command": "documentTabs.colorByProject",
+          "when": "view == documentTabsView && documentTabs.colorBy != project",
+          "group": "1_color@1"
+        },
+        {
+          "command": "documentTabs.colorByExtension.checked",
+          "when": "view == documentTabsView && documentTabs.colorBy == extension",
+          "group": "1_color@2"
+        },
+        {
+          "command": "documentTabs.colorByExtension",
+          "when": "view == documentTabsView && documentTabs.colorBy != extension",
+          "group": "1_color@2"
+        },
+        {
+          "command": "documentTabs.colorByNone.checked",
+          "when": "view == documentTabsView && documentTabs.colorBy == none",
+          "group": "1_color@3"
+        },
+        {
+          "command": "documentTabs.colorByNone",
+          "when": "view == documentTabsView && documentTabs.colorBy != none",
+          "group": "1_color@3"
+        }
+      ],
+      "documentTabs.setTabColorSubmenu": [
+        {
+          "command": "documentTabs.setTabColor.none",
+          "when": "view == documentTabsView",
+          "group": "1_color@1"
+        },
+        {
+          "command": "documentTabs.setTabColor.lavender",
+          "when": "view == documentTabsView",
+          "group": "1_color@2"
+        },
+        {
+          "command": "documentTabs.setTabColor.gold",
+          "when": "view == documentTabsView",
+          "group": "1_color@3"
+        },
+        {
+          "command": "documentTabs.setTabColor.cyan",
+          "when": "view == documentTabsView",
+          "group": "1_color@4"
+        },
+        {
+          "command": "documentTabs.setTabColor.burgundy",
+          "when": "view == documentTabsView",
+          "group": "1_color@5"
+        },
+        {
+          "command": "documentTabs.setTabColor.green",
+          "when": "view == documentTabsView",
+          "group": "1_color@6"
+        },
+        {
+          "command": "documentTabs.setTabColor.brown",
+          "when": "view == documentTabsView",
+          "group": "1_color@7"
+        },
+        {
+          "command": "documentTabs.setTabColor.royalBlue",
+          "when": "view == documentTabsView",
+          "group": "1_color@8"
+        },
+        {
+          "command": "documentTabs.setTabColor.pumpkin",
+          "when": "view == documentTabsView",
+          "group": "1_color@9"
+        },
+        {
+          "command": "documentTabs.setTabColor.gray",
+          "when": "view == documentTabsView",
+          "group": "1_color@10"
+        },
+        {
+          "command": "documentTabs.setTabColor.volt",
+          "when": "view == documentTabsView",
+          "group": "1_color@11"
+        },
+        {
+          "command": "documentTabs.setTabColor.teal",
+          "when": "view == documentTabsView",
+          "group": "1_color@12"
+        },
+        {
+          "command": "documentTabs.setTabColor.magenta",
+          "when": "view == documentTabsView",
+          "group": "1_color@13"
+        },
+        {
+          "command": "documentTabs.setTabColor.mint",
+          "when": "view == documentTabsView",
+          "group": "1_color@14"
+        },
+        {
+          "command": "documentTabs.setTabColor.darkBrown",
+          "when": "view == documentTabsView",
+          "group": "1_color@15"
+        },
+        {
+          "command": "documentTabs.setTabColor.blue",
+          "when": "view == documentTabsView",
+          "group": "1_color@16"
+        },
+        {
+          "command": "documentTabs.setTabColor.pink",
+          "when": "view == documentTabsView",
+          "group": "1_color@17"
         }
       ]
     },
@@ -388,6 +642,21 @@
             "Group tabs by workspace folder / project"
           ],
           "description": "How to group the tabs in the view"
+        },
+        "documentTabs.colorBy": {
+          "type": "string",
+          "default": "none",
+          "enum": [
+            "none",
+            "project",
+            "extension"
+          ],
+          "enumDescriptions": [
+            "No automatic tab coloring",
+            "Color tabs based on detected project",
+            "Color tabs based on file extension"
+          ],
+          "description": "How to color tabs in the view"
         },
         "documentTabs.showPinnedSeparately": {
           "type": "boolean",

@@ -3,6 +3,8 @@ import {
     DocumentTabsConfig,
     SortOrder,
     GroupBy,
+    ColorBy,
+    TabColorName,
     TabItem,
     GroupItem,
     TreeViewItem,
@@ -36,6 +38,111 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
 
     constructor(private context: vscode.ExtensionContext) {
         this.initializeTabOrder();
+    }
+
+    private static readonly tabColorStorageKey = 'documentTabs.tabColors';
+
+    private getManualTabColors(): Record<string, TabColorName> {
+        return this.context.workspaceState.get<Record<string, TabColorName>>(
+            DocumentTabsProvider.tabColorStorageKey,
+            {}
+        );
+    }
+
+    private async setManualTabColor(uri: vscode.Uri, color: TabColorName): Promise<void> {
+        const key = uri.toString();
+        const colors = this.getManualTabColors();
+
+        if (color === 'none') {
+            delete colors[key];
+        } else {
+            colors[key] = color;
+        }
+
+        await this.context.workspaceState.update(DocumentTabsProvider.tabColorStorageKey, colors);
+        this.refresh();
+    }
+
+    async clearManualTabColor(uri: vscode.Uri): Promise<void> {
+        await this.setManualTabColor(uri, 'none');
+    }
+
+    async setManualTabColorByName(uri: vscode.Uri, color: TabColorName): Promise<void> {
+        await this.setManualTabColor(uri, color);
+    }
+
+    private static hashString(value: string): number {
+        // Simple stable hash (djb2)
+        let hash = 5381;
+        for (let i = 0; i < value.length; i++) {
+            hash = ((hash << 5) + hash) ^ value.charCodeAt(i);
+        }
+        return Math.abs(hash);
+    }
+
+    private static readonly autoColorPalette: TabColorName[] = [
+        'lavender',
+        'gold',
+        'cyan',
+        'burgundy',
+        'green',
+        'brown',
+        'royalBlue',
+        'pumpkin',
+        'gray',
+        'volt',
+        'teal',
+        'magenta',
+        'mint',
+        'darkBrown',
+        'blue',
+        'pink'
+    ];
+
+    private static readonly themeColorByTabColor: Record<Exclude<TabColorName, 'none'>, string> = {
+        lavender: 'charts.purple',
+        gold: 'charts.yellow',
+        cyan: 'terminal.ansiCyan',
+        burgundy: 'terminal.ansiRed',
+        green: 'charts.green',
+        brown: 'terminal.ansiYellow',
+        royalBlue: 'charts.blue',
+        pumpkin: 'charts.orange',
+        gray: 'terminal.ansiBrightBlack',
+        volt: 'terminal.ansiBrightYellow',
+        teal: 'terminal.ansiBrightCyan',
+        magenta: 'terminal.ansiMagenta',
+        mint: 'terminal.ansiBrightGreen',
+        darkBrown: 'terminal.ansiBlack',
+        blue: 'terminal.ansiBlue',
+        pink: 'terminal.ansiBrightMagenta'
+    };
+
+    private getEffectiveTabColor(tab: TabItem, config: DocumentTabsConfig): TabColorName {
+        const manualColors = this.getManualTabColors();
+        const manual = manualColors[tab.uri.toString()];
+        if (manual) {
+            return manual;
+        }
+
+        if (config.colorBy === 'none') {
+            return 'none';
+        }
+
+        let key: string;
+        switch (config.colorBy) {
+            case 'project':
+                key = getProjectFolder(tab.uri);
+                break;
+            case 'extension':
+                key = getFileExtension(tab.uri);
+                break;
+            default:
+                return 'none';
+        }
+
+        const index = DocumentTabsProvider.hashString(key) % DocumentTabsProvider.autoColorPalette.length;
+        return DocumentTabsProvider.autoColorPalette[index] ?? 'none';
     }
 
     private invalidateCache(): void {
@@ -106,6 +213,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
         return {
             sortOrder: config.get<SortOrder>('sortOrder', 'alphabetical'),
             groupBy: config.get<GroupBy>('groupBy', 'folder'),
+            colorBy: config.get<ColorBy>('colorBy', 'none'),
             showPinnedSeparately: config.get<boolean>('showPinnedSeparately', true),
             showTabCount: config.get<boolean>('showTabCount', true),
             showDirtyIndicator: config.get<boolean>('showDirtyIndicator', true),
@@ -275,6 +383,13 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
         const tab = element;
         const treeItem = new vscode.TreeItem(tab.label);
 
+        // Tab coloring (manual overrides, or auto based on config)
+        const tabColor = this.getEffectiveTabColor(tab, config);
+        if (tabColor !== 'none') {
+            const themeColorId = DocumentTabsProvider.themeColorByTabColor[tabColor];
+            treeItem.iconPath = new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor(themeColorId));
+        }
+
         // Set description (path)
         if (config.showPath) {
             treeItem.description = getRelativePath(tab.uri);
@@ -284,7 +399,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
         if (config.showFileIcons) {
             treeItem.resourceUri = tab.uri;
         } else {
-            treeItem.iconPath = new vscode.ThemeIcon('file');
+            treeItem.iconPath = treeItem.iconPath ?? new vscode.ThemeIcon('file');
         }
 
         // Set dirty indicator
