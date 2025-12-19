@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2025-12-18
+
+### Added
+
+- README context menu screenshot
+
+### Changed
+
+- View menu: show Color section items directly (no submenu)
+- README view menu screenshot updated
+
 ## [1.0.2] - 2025-12-14
 
 ### Added
@@ -51,7 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/GridFlowTech/document-tabs/releases/tag/v1.0.0

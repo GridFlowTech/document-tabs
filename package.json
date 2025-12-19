@@ -2,7 +2,7 @@
   "name": "document-tabs",
   "displayName": "Document Tabs",
   "description": "A Visual Studio-style vertical tab grouping view for VS Code. Shows currently open tabs in a sidebar with grouping, sorting, and tab management features.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "MIT",
   "publisher": "GridFlowTech",
   "engines": {
@@ -28,10 +28,6 @@
   "icon": "resources/icon.png",
   "contributes": {
     "submenus": [
-      {
-        "id": "documentTabs.colorBySubmenu",
-        "label": "Color Document Tabs by"
-      },
       {
         "id": "documentTabs.setTabColorSubmenu",
         "label": "Set Tab Color"
@@ -401,19 +397,44 @@
           "group": "2_group@4"
         },
         {
-          "submenu": "documentTabs.colorBySubmenu",
-          "when": "view == documentTabsView",
-          "group": "3_actions@0"
+          "command": "documentTabs.colorByNone.checked",
+          "when": "view == documentTabsView && documentTabs.colorBy == none",
+          "group": "3_color@1"
+        },
+        {
+          "command": "documentTabs.colorByNone",
+          "when": "view == documentTabsView && documentTabs.colorBy != none",
+          "group": "3_color@1"
+        },
+        {
+          "command": "documentTabs.colorByProject.checked",
+          "when": "view == documentTabsView && documentTabs.colorBy == project",
+          "group": "3_color@2"
+        },
+        {
+          "command": "documentTabs.colorByProject",
+          "when": "view == documentTabsView && documentTabs.colorBy != project",
+          "group": "3_color@2"
+        },
+        {
+          "command": "documentTabs.colorByExtension.checked",
+          "when": "view == documentTabsView && documentTabs.colorBy == extension",
+          "group": "3_color@3"
+        },
+        {
+          "command": "documentTabs.colorByExtension",
+          "when": "view == documentTabsView && documentTabs.colorBy != extension",
+          "group": "3_color@3"
         },
         {
           "command": "documentTabs.closeAllTabs",
           "when": "view == documentTabsView",
-          "group": "3_actions@1"
+          "group": "4_actions@1"
         },
         {
           "command": "documentTabs.openOptions",
           "when": "view == documentTabsView",
-          "group": "4_options@1"
+          "group": "5_options@1"
         }
       ],
       "view/item/context": [
@@ -486,38 +507,6 @@
           "command": "documentTabs.revealInExplorer",
           "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
           "group": "5_reveal@1"
-        }
-      ],
-      "documentTabs.colorBySubmenu": [
-        {
-          "command": "documentTabs.colorByProject.checked",
-          "when": "view == documentTabsView && documentTabs.colorBy == project",
-          "group": "1_color@1"
-        },
-        {
-          "command": "documentTabs.colorByProject",
-          "when": "view == documentTabsView && documentTabs.colorBy != project",
-          "group": "1_color@1"
-        },
-        {
-          "command": "documentTabs.colorByExtension.checked",
-          "when": "view == documentTabsView && documentTabs.colorBy == extension",
-          "group": "1_color@2"
-        },
-        {
-          "command": "documentTabs.colorByExtension",
-          "when": "view == documentTabsView && documentTabs.colorBy != extension",
-          "group": "1_color@2"
-        },
-        {
-          "command": "documentTabs.colorByNone.checked",
-          "when": "view == documentTabsView && documentTabs.colorBy == none",
-          "group": "1_color@3"
-        },
-        {
-          "command": "documentTabs.colorByNone",
-          "when": "view == documentTabsView && documentTabs.colorBy != none",
-          "group": "1_color@3"
         }
       ],
       "documentTabs.setTabColorSubmenu": [
