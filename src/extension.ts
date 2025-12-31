@@ -42,6 +42,32 @@ export function activate(context: vscode.ExtensionContext) {
     // Initial refresh
     tabsProvider.refresh();
 
+    // Helper function to reveal active file in tree view
+    const revealActiveFile = async (uri: vscode.Uri) => {
+        if (treeView.visible) {
+            const tabItem = tabsProvider.findTabByUri(uri);
+            if (tabItem) {
+                try {
+                    await treeView.reveal(tabItem, { select: true, focus: false, expand: true });
+                } catch {
+                    // Ignore errors if element can't be revealed
+                }
+            }
+        }
+    };
+
+    // Reveal currently active file when tree view becomes visible
+    let hasRevealedOnStartup = false;
+    const visibilityChangeListener = treeView.onDidChangeVisibility(async (e) => {
+        if (e.visible && !hasRevealedOnStartup) {
+            hasRevealedOnStartup = true;
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor) {
+                await revealActiveFile(activeEditor.document.uri);
+            }
+        }
+    });
+
     // Coalesce multiple refresh triggers that can fire back-to-back
     let refreshPending = false;
     const scheduleRefresh = () => {
@@ -73,6 +99,13 @@ export function activate(context: vscode.ExtensionContext) {
     // Listen for tab group changes
     const tabGroupChangeListener = vscode.window.tabGroups.onDidChangeTabGroups(() => {
         scheduleRefresh();
+    });
+
+    // Listen for active editor changes to sync with main window selection
+    const activeEditorChangeListener = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+        if (editor) {
+            await revealActiveFile(editor.document.uri);
+        }
     });
 
     // Listen for configuration changes
@@ -350,6 +383,8 @@ export function activate(context: vscode.ExtensionContext) {
         treeView,
         tabChangeListener,
         tabGroupChangeListener,
+        visibilityChangeListener,
+        activeEditorChangeListener,
         configChangeListener,
         refreshCommand,
         expandAllCommand,

@@ -15,7 +15,8 @@ import {
     getFileExtension,
     getParentFolder,
     getProjectFolder,
-    getRelativePath
+    getRelativePath,
+    clearProjectFolderCache
 } from './types';
 
 /**
@@ -227,6 +228,8 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
      * Refresh the tree view
      */
     refresh(): void {
+        // Clear project folder cache to pick up project file renames
+        clearProjectFolderCache();
         this.invalidateCache();
         this._onDidChangeTreeData.fire();
         this.updateBadge();

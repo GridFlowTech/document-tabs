@@ -162,6 +162,13 @@ export function getWorkspaceFolder(uri: vscode.Uri): string {
 const projectFolderCache = new Map<string, string>();
 
 /**
+ * Clear the project folder cache (useful after project file renames)
+ */
+export function clearProjectFolderCache(): void {
+    projectFolderCache.clear();
+}
+
+/**
  * Synchronously scans a directory for project files and returns the project name
  */
 function findProjectFileInDirectorySync(dirPath: string): string | null {
@@ -174,11 +181,15 @@ function findProjectFileInDirectorySync(dirPath: string): string | null {
 
         const files = fs.readdirSync(dirPath);
 
-        // Look for .csproj, .fsproj, .vbproj files first
+        // Look for any .xxxproj file - matches:
+        // .csproj (C#), .fsproj (F#), .vbproj (Visual Basic), .vcxproj (C++),
+        // .dbproj (Database), .wixproj (WiX Installer), .pssproj (PowerShell),
+        // .modelproj (Modeling), .pyproj (Python), .rbproj (Ruby), .proj (Generic),
+        // and any future .xxxproj variants
         for (const file of files) {
-            if (file.endsWith('.csproj') || file.endsWith('.fsproj') || file.endsWith('.vbproj')) {
+            if (file.match(/\.[^.]*proj$/i)) {
                 // Return the project name without extension
-                return file.replace(/\.(csproj|fsproj|vbproj)$/, '');
+                return file.replace(/\.[^.]*proj$/i, '');
             }
         }
 
@@ -209,7 +220,7 @@ export function getProjectFolder(uri: vscode.Uri): string {
         return projectFolderCache.get(cacheKey)!;
     }
 
-    // Get the directory of the file and walk upward to find a .csproj file
+    // Get the directory of the file and walk upward to find a .xxxproj file
     let currentDir = startingDir;
     const workspacePath = workspaceFolder.uri.fsPath;
 
