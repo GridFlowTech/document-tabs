@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-02-01
+
+### Added
+
+- Tab navigation commands: Go to Next/Previous Tab in Document Tabs order
+- Default keybindings: Alt+PageDown (next) and Alt+PageUp (previous)
+- Navigate tabs using the plugin's sort/group order instead of VS Code's built-in tab order
+
 ## [1.0.4] - 2025-12-30
 
 ### Added
@@ -76,7 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.4...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.5...HEAD
+[1.0.5]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.1...v1.0.2

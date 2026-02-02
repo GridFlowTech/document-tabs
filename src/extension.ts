@@ -378,6 +378,51 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    // Navigation commands - switch tabs in the Document Tabs order
+    const nextTabCommand = vscode.commands.registerCommand('documentTabs.nextTab', async () => {
+        const orderedTabs = tabsProvider.getOrderedTabs();
+        if (orderedTabs.length === 0) {
+            return;
+        }
+
+        const activeUri = vscode.window.activeTextEditor?.document.uri;
+        let nextIndex = 0;
+
+        if (activeUri) {
+            const currentIndex = orderedTabs.findIndex(t => t.uri.toString() === activeUri.toString());
+            if (currentIndex !== -1) {
+                nextIndex = (currentIndex + 1) % orderedTabs.length;
+            }
+        }
+
+        const nextTab = orderedTabs[nextIndex];
+        if (nextTab) {
+            await vscode.window.showTextDocument(nextTab.uri, { preview: false });
+        }
+    });
+
+    const previousTabCommand = vscode.commands.registerCommand('documentTabs.previousTab', async () => {
+        const orderedTabs = tabsProvider.getOrderedTabs();
+        if (orderedTabs.length === 0) {
+            return;
+        }
+
+        const activeUri = vscode.window.activeTextEditor?.document.uri;
+        let prevIndex = orderedTabs.length - 1;
+
+        if (activeUri) {
+            const currentIndex = orderedTabs.findIndex(t => t.uri.toString() === activeUri.toString());
+            if (currentIndex !== -1) {
+                prevIndex = (currentIndex - 1 + orderedTabs.length) % orderedTabs.length;
+            }
+        }
+
+        const prevTab = orderedTabs[prevIndex];
+        if (prevTab) {
+            await vscode.window.showTextDocument(prevTab.uri, { preview: false });
+        }
+    });
+
     // Add all subscriptions to context
     context.subscriptions.push(
         treeView,
@@ -436,7 +481,9 @@ export function activate(context: vscode.ExtensionContext) {
         copyPathCommand,
         copyRelativePathCommand,
         revealInExplorerCommand,
-        openToSideCommand
+        openToSideCommand,
+        nextTabCommand,
+        previousTabCommand
     );
 }
 

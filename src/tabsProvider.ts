@@ -563,4 +563,25 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
         const tabs = this.getAllTabs();
         return tabs.find(t => t.uri.toString() === uri.toString());
     }
+
+    /**
+     * Get the flat ordered list of all tabs as displayed in the tree view.
+     * This respects grouping and sorting configuration.
+     */
+    getOrderedTabs(): TabItem[] {
+        const children = this.getChildren();
+        const result: TabItem[] = [];
+
+        for (const child of children) {
+            if (isTabItem(child)) {
+                result.push(child);
+            } else if (isGroupItem(child)) {
+                // Get sorted tabs within the group
+                const groupTabs = this.sortTabs(child.tabs);
+                result.push(...groupTabs);
+            }
+        }
+
+        return result;
+    }
 }
