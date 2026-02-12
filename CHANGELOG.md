@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-02-11
+
+### Added
+
+- Comprehensive test suite with 50+ test cases (extension, provider, and type guards)
+- Windows path resolution for test discovery (8.3 short path support)
+- Extensive error handling with user-facing messages for all commands
+
+### Changed
+
+- Major performance optimizations: caching, memoization, and pre-computed values
+- Configuration caching (100ms TTL) to reduce repeated reads during render cycles
+- Project folder caching with LRU-style size limiting (max 1000 entries)
+- Parent lookup map for O(1) reveal performance in tree view
+- Pre-computed tab data (project folders, file extensions) in getAllTabs()
+- Refactored tab sorting within groups to avoid double-sorting
+- Code formatting consistency with Prettier and ESLint
+- All commands now wrapped in try-catch for robustness
+- Async context key updates to ensure proper menu state synchronization
+- Improved tree view event handling with debounced refresh
+
+### Fixed
+
+- Graceful error handling in all async operations
+- Type guard improvements for discriminated union pattern
+- Proper cleanup and cache invalidation on configuration changes
+
 ## [1.0.5] - 2026-02-01
 
 ### Added
@@ -84,7 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.6...HEAD
+[1.0.6]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.2...v1.0.3

@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
 
 /**
  * Represents the sorting options for tabs
@@ -19,61 +21,62 @@ export type ColorBy = 'none' | 'project' | 'extension';
  * Supported manual tab colors.
  */
 export type TabColorName =
-    | 'none'
-    | 'lavender'
-    | 'gold'
-    | 'cyan'
-    | 'burgundy'
-    | 'green'
-    | 'brown'
-    | 'royalBlue'
-    | 'pumpkin'
-    | 'gray'
-    | 'volt'
-    | 'teal'
-    | 'magenta'
-    | 'mint'
-    | 'darkBrown'
-    | 'blue'
-    | 'pink';
+  | 'none'
+  | 'lavender'
+  | 'gold'
+  | 'cyan'
+  | 'burgundy'
+  | 'green'
+  | 'brown'
+  | 'royalBlue'
+  | 'pumpkin'
+  | 'gray'
+  | 'volt'
+  | 'teal'
+  | 'magenta'
+  | 'mint'
+  | 'darkBrown'
+  | 'blue'
+  | 'pink';
 
 /**
  * Configuration interface for Document Tabs extension
  */
 export interface DocumentTabsConfig {
-    sortOrder: SortOrder;
-    groupBy: GroupBy;
-    colorBy: ColorBy;
-    showPinnedSeparately: boolean;
-    showTabCount: boolean;
-    showDirtyIndicator: boolean;
-    showFileIcons: boolean;
-    showPath: boolean;
-    collapseGroupsByDefault: boolean;
+  sortOrder: SortOrder;
+  groupBy: GroupBy;
+  colorBy: ColorBy;
+  showPinnedSeparately: boolean;
+  showTabCount: boolean;
+  showDirtyIndicator: boolean;
+  showFileIcons: boolean;
+  showPath: boolean;
+  collapseGroupsByDefault: boolean;
 }
 
 /**
  * Represents a tab item in the tree view
  */
 export interface TabItem {
-    type: 'tab';
-    tab: vscode.Tab;
-    uri: vscode.Uri;
-    label: string;
-    isPinned: boolean;
-    isDirty: boolean;
-    openedAt: number;
-    groupName?: string;
+  type: 'tab';
+  tab: vscode.Tab;
+  uri: vscode.Uri;
+  label: string;
+  isPinned: boolean;
+  isDirty: boolean;
+  openedAt: number;
+  groupName?: string;
+  projectFolder?: string;
 }
 
 /**
  * Represents a group item in the tree view
  */
 export interface GroupItem {
-    type: 'group';
-    name: string;
-    tabs: TabItem[];
-    collapsibleState: vscode.TreeItemCollapsibleState;
+  type: 'group';
+  name: string;
+  tabs: TabItem[];
+  collapsibleState: vscode.TreeItemCollapsibleState;
 }
 
 /**
@@ -85,187 +88,178 @@ export type TreeViewItem = TabItem | GroupItem;
  * Type guard to check if an item is a TabItem
  */
 export function isTabItem(item: TreeViewItem): item is TabItem {
-    return item.type === 'tab';
+  return item.type === 'tab';
 }
 
 /**
  * Type guard to check if an item is a GroupItem
  */
 export function isGroupItem(item: TreeViewItem): item is GroupItem {
-    return item.type === 'group';
+  return item.type === 'group';
 }
 
 /**
  * Gets the URI from a tab input if available
  */
 export function getTabUri(tab: vscode.Tab): vscode.Uri | undefined {
-    const input = tab.input;
+  const input = tab.input;
 
-    if (input instanceof vscode.TabInputText) {
-        return input.uri;
-    }
-    if (input instanceof vscode.TabInputNotebook) {
-        return input.uri;
-    }
-    if (input instanceof vscode.TabInputCustom) {
-        return input.uri;
-    }
-    if (input instanceof vscode.TabInputTextDiff) {
-        return input.modified;
-    }
-    if (input instanceof vscode.TabInputNotebookDiff) {
-        return input.modified;
-    }
+  if (input instanceof vscode.TabInputText) {
+    return input.uri;
+  }
+  if (input instanceof vscode.TabInputNotebook) {
+    return input.uri;
+  }
+  if (input instanceof vscode.TabInputCustom) {
+    return input.uri;
+  }
+  if (input instanceof vscode.TabInputTextDiff) {
+    return input.modified;
+  }
+  if (input instanceof vscode.TabInputNotebookDiff) {
+    return input.modified;
+  }
 
-    return undefined;
+  return undefined;
 }
 
 /**
  * Gets the file name from a URI
  */
 export function getFileName(uri: vscode.Uri): string {
-    const parts = uri.path.split('/');
-    return parts[parts.length - 1] || uri.path;
+  const parts = uri.path.split('/');
+  return parts[parts.length - 1] || uri.path;
 }
 
 /**
  * Gets the file extension from a URI
  */
 export function getFileExtension(uri: vscode.Uri): string {
-    const fileName = getFileName(uri);
-    const parts = fileName.split('.');
-    return parts.length > 1 ? `.${parts[parts.length - 1]}` : 'No Extension';
+  const fileName = getFileName(uri);
+  const parts = fileName.split('.');
+  return parts.length > 1 ? `.${parts[parts.length - 1]}` : 'No Extension';
 }
 
 /**
  * Gets the parent folder name from a URI
  */
 export function getParentFolder(uri: vscode.Uri): string {
-    const parts = uri.path.split('/');
-    if (parts.length >= 2) {
-        return parts[parts.length - 2] || 'Root';
-    }
-    return 'Root';
+  const parts = uri.path.split('/');
+  if (parts.length >= 2) {
+    return parts[parts.length - 2] || 'Root';
+  }
+  return 'Root';
 }
 
 /**
  * Gets the workspace folder name for a URI
  */
 export function getWorkspaceFolder(uri: vscode.Uri): string {
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-    return workspaceFolder?.name || 'External';
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+  return workspaceFolder?.name || 'External';
 }
 
 /**
  * Cache for project folder lookups to avoid repeated file system scans
+ * Now with LRU-style size limiting
  */
 const projectFolderCache = new Map<string, string>();
+const MAX_PROJECT_CACHE_SIZE = 1000;
 
 /**
  * Clear the project folder cache (useful after project file renames)
  */
 export function clearProjectFolderCache(): void {
-    projectFolderCache.clear();
-}
-
-/**
- * Synchronously scans a directory for project files and returns the project name
- */
-function findProjectFileInDirectorySync(dirPath: string): string | null {
-    try {
-        const fs = require('fs');
-
-        if (!fs.existsSync(dirPath)) {
-            return null;
-        }
-
-        const files = fs.readdirSync(dirPath);
-
-        // Look for any .xxxproj file - matches:
-        // .csproj (C#), .fsproj (F#), .vbproj (Visual Basic), .vcxproj (C++),
-        // .dbproj (Database), .wixproj (WiX Installer), .pssproj (PowerShell),
-        // .modelproj (Modeling), .pyproj (Python), .rbproj (Ruby), .proj (Generic),
-        // and any future .xxxproj variants
-        for (const file of files) {
-            if (file.match(/\.[^.]*proj$/i)) {
-                // Return the project name without extension
-                return file.replace(/\.[^.]*proj$/i, '');
-            }
-        }
-
-        return null;
-    } catch {
-        return null;
-    }
+  projectFolderCache.clear();
 }
 
 /**
  * Gets the project folder for a URI by finding the nearest folder containing a project file
- * (.csproj, .fsproj, .vbproj, package.json, etc.)
+ * (.csproj, .fsproj, .vbproj, etc.)
+ * Synchronous version that scans directories and checks cache first
  */
 export function getProjectFolder(uri: vscode.Uri): string {
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-    if (!workspaceFolder) {
-        return 'External';
-    }
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+  if (!workspaceFolder) {
+    return 'External';
+  }
 
-    const filePath = uri.fsPath;
-    const path = require('path');
+  const startingDir = path.dirname(uri.fsPath);
 
-    const startingDir = path.dirname(filePath);
+  // Check cache first
+  if (projectFolderCache.has(startingDir)) {
+    return projectFolderCache.get(startingDir)!;
+  }
 
-    // Check cache first
-    const cacheKey = startingDir;
-    if (projectFolderCache.has(cacheKey)) {
-        return projectFolderCache.get(cacheKey)!;
-    }
+  // Walk upward to find a .xxxproj file
+  let currentDir = startingDir;
+  const workspacePath = workspaceFolder.uri.fsPath;
 
-    // Get the directory of the file and walk upward to find a .xxxproj file
-    let currentDir = startingDir;
-    const workspacePath = workspaceFolder.uri.fsPath;
-
-    while (currentDir && currentDir.length >= workspacePath.length) {
-        const projectName = findProjectFileInDirectorySync(currentDir);
-
-        if (projectName) {
-            projectFolderCache.set(cacheKey, projectName);
+  while (currentDir && currentDir.length >= workspacePath.length) {
+    try {
+      if (fs.existsSync(currentDir)) {
+        const files = fs.readdirSync(currentDir);
+        for (const file of files) {
+          if (file.match(/\.[^.]*proj$/i)) {
+            const projectName = file.replace(/\.[^.]*proj$/i, '');
+            if (projectFolderCache.size >= MAX_PROJECT_CACHE_SIZE) {
+              const firstKey = projectFolderCache.keys().next().value;
+              if (firstKey) {
+                projectFolderCache.delete(firstKey);
+              }
+            }
+            projectFolderCache.set(startingDir, projectName);
             return projectName;
+          }
         }
-
-        // Move up one directory
-        const parentDir = path.dirname(currentDir);
-        if (parentDir === currentDir) {
-            break; // Reached root
-        }
-        currentDir = parentDir;
+      }
+    } catch (error) {
+      console.error('DocumentTabs: Failed to scan directory:', error);
     }
 
-    // Fallback: use the first meaningful folder in the relative path
-    const relativePath = vscode.workspace.asRelativePath(uri, false);
-    const pathParts = relativePath.split(/[/\\]/);
-    const dirParts = pathParts.slice(0, -1);
-
-    for (const folderName of dirParts) {
-        const rootFolders = ['src', 'source', 'lib', 'libs', 'packages', 'projects', 'apps', 'modules'];
-        if (!rootFolders.includes(folderName.toLowerCase()) && folderName.length > 0) {
-            projectFolderCache.set(cacheKey, folderName);
-            return folderName;
-        }
+    const parentDir = path.dirname(currentDir);
+    if (parentDir === currentDir) {
+      break;
     }
+    currentDir = parentDir;
+  }
 
-    // Fallback to workspace folder name
-    const result = workspaceFolder.name;
-    projectFolderCache.set(cacheKey, result);
-    return result;
+  // Fallback: first meaningful folder in relative path
+  const dirParts = vscode.workspace.asRelativePath(uri, false).split(/[\\/]/).slice(0, -1);
+  const rootFolders = ['src', 'source', 'lib', 'libs', 'packages', 'projects', 'apps', 'modules'];
+
+  for (const folderName of dirParts) {
+    if (!rootFolders.includes(folderName.toLowerCase()) && folderName.length > 0) {
+      if (projectFolderCache.size >= MAX_PROJECT_CACHE_SIZE) {
+        const firstKey = projectFolderCache.keys().next().value;
+        if (firstKey) {
+          projectFolderCache.delete(firstKey);
+        }
+      }
+      projectFolderCache.set(startingDir, folderName);
+      return folderName;
+    }
+  }
+
+  // Ultimate fallback
+  const result = workspaceFolder.name;
+  if (projectFolderCache.size >= MAX_PROJECT_CACHE_SIZE) {
+    const firstKey = projectFolderCache.keys().next().value;
+    if (firstKey) {
+      projectFolderCache.delete(firstKey);
+    }
+  }
+  projectFolderCache.set(startingDir, result);
+  return result;
 }
 
 /**
  * Gets the relative path from the workspace folder
  */
 export function getRelativePath(uri: vscode.Uri): string {
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-    if (workspaceFolder) {
-        return vscode.workspace.asRelativePath(uri, false);
-    }
-    return uri.fsPath;
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+  if (workspaceFolder) {
+    return vscode.workspace.asRelativePath(uri, false);
+  }
+  return uri.fsPath;
 }

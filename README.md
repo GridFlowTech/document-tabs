@@ -64,16 +64,16 @@ A Visual Studio-style vertical tab grouping view for VS Code. This extension pro
 
 Open **Settings** and search for "Document Tabs", or run **Document Tabs: Options...** from the Command Palette.
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `documentTabs.sortOrder` | `alphabetical` | How to sort tabs (alphabetical, recentlyOpenedFirst, recentlyOpenedLast) |
-| `documentTabs.groupBy` | `folder` | How to group tabs (none, folder, extension, project) |
-| `documentTabs.showPinnedSeparately` | `true` | Show pinned tabs in a separate group |
-| `documentTabs.showTabCount` | `true` | Show tab count in the view badge |
-| `documentTabs.showDirtyIndicator` | `true` | Show indicator for unsaved files |
-| `documentTabs.showFileIcons` | `true` | Show file icons |
-| `documentTabs.showPath` | `true` | Show file path in description |
-| `documentTabs.collapseGroupsByDefault` | `false` | Start with groups collapsed |
+| Setting                                | Default        | Description                                                              |
+| -------------------------------------- | -------------- | ------------------------------------------------------------------------ |
+| `documentTabs.sortOrder`               | `alphabetical` | How to sort tabs (alphabetical, recentlyOpenedFirst, recentlyOpenedLast) |
+| `documentTabs.groupBy`                 | `folder`       | How to group tabs (none, folder, extension, project)                     |
+| `documentTabs.showPinnedSeparately`    | `true`         | Show pinned tabs in a separate group                                     |
+| `documentTabs.showTabCount`            | `true`         | Show tab count in the view badge                                         |
+| `documentTabs.showDirtyIndicator`      | `true`         | Show indicator for unsaved files                                         |
+| `documentTabs.showFileIcons`           | `true`         | Show file icons                                                          |
+| `documentTabs.showPath`                | `true`         | Show file path in description                                            |
+| `documentTabs.collapseGroupsByDefault` | `false`        | Start with groups collapsed                                              |
 
 ## Keyboard Shortcuts
 

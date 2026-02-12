@@ -8,9 +8,8 @@ dist/
 # Dependencies
 node_modules/
 .vscode-test/
-package-lock.json
 
-# VS Code (local user settings)
+# VS Code specific
 .vscode/
 *.code-workspace
 
@@ -19,12 +18,18 @@ tsconfig.tsbuildinfo
 coverage/
 .nyc_output/
 
-# Logs
-*.log
-npm-debug.log*
+# Minified files
+*.min.js
+*.min.css
 
-# Local-only files
-PUBLISHING.md
-AGENTS.md
+# Git metadata
+.git/
+.gitattributes
+.gitignore
+
+# Resources (static assets)
+resources/
+
+# Memory MCP
 Memory/
 memory/

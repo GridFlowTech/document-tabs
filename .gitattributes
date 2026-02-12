@@ -1,0 +1,25 @@
+# Normalize text files to LF on checkin/checkout
+* text=auto eol=lf
+
+# Ensure common text file types use LF
+*.md text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Mark binary files explicitly
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.gz binary
+
+# Keep the `.gitattributes` file consistent
+.gitattributes text eol=lf
