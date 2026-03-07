@@ -64,6 +64,7 @@ export interface TabItem {
   label: string;
   isPinned: boolean;
   isDirty: boolean;
+  isDiff: boolean;
   openedAt: number;
   groupName?: string;
   projectFolder?: string;
@@ -121,6 +122,24 @@ export function getTabUri(tab: vscode.Tab): vscode.Uri | undefined {
   }
 
   return undefined;
+}
+
+/**
+ * Returns true when the tab represents a text diff (e.g. Git Working Tree).
+ */
+export function isTabDiff(tab: vscode.Tab): boolean {
+  return tab.input instanceof vscode.TabInputTextDiff;
+}
+
+/**
+ * Unique key for a tab — differentiates regular files from their diff counterparts.
+ */
+export function getTabKey(tab: vscode.Tab): string | undefined {
+  const uri = getTabUri(tab);
+  if (!uri) {
+    return undefined;
+  }
+  return isTabDiff(tab) ? uri.toString() + '#diff' : uri.toString();
 }
 
 /**

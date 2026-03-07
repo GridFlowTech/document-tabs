@@ -56,9 +56,9 @@ export function activate(context: vscode.ExtensionContext) {
   tabsProvider.refresh();
 
   // Helper function to reveal active file in tree view
-  const revealActiveFile = async (uri: vscode.Uri) => {
+  const revealActiveTab = async () => {
     if (treeView.visible) {
-      const tabItem = tabsProvider.findTabByUri(uri);
+      const tabItem = tabsProvider.findActiveTab();
       if (tabItem) {
         try {
           await treeView.reveal(tabItem, { select: true, focus: false, expand: true });
@@ -76,7 +76,7 @@ export function activate(context: vscode.ExtensionContext) {
       hasRevealedOnStartup = true;
       const activeEditor = vscode.window.activeTextEditor;
       if (activeEditor) {
-        await revealActiveFile(activeEditor.document.uri);
+        await revealActiveTab();
       }
     }
   });
@@ -117,7 +117,32 @@ export function activate(context: vscode.ExtensionContext) {
   // Listen for active editor changes to sync with main window selection
   const activeEditorChangeListener = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
     if (editor) {
-      await revealActiveFile(editor.document.uri);
+      await revealActiveTab();
+    }
+  });
+
+  // When user clicks dead space in the tree view, the selection empties.
+  // Re-select the active file so the highlight is preserved.
+  let isReselecting = false;
+  const selectionChangeListener = treeView.onDidChangeSelection(async (e) => {
+    if (isReselecting) {
+      return;
+    }
+    if (e.selection.length === 0) {
+      const activeEditor = vscode.window.activeTextEditor;
+      if (activeEditor) {
+        const tabItem = tabsProvider.findActiveTab();
+        if (tabItem) {
+          try {
+            isReselecting = true;
+            await treeView.reveal(tabItem, { select: true, focus: false });
+          } catch (error) {
+            console.error('DocumentTabs: Failed to re-select tab:', error);
+          } finally {
+            isReselecting = false;
+          }
+        }
+      }
     }
   });
 
@@ -796,6 +821,7 @@ export function activate(context: vscode.ExtensionContext) {
     tabGroupChangeListener,
     visibilityChangeListener,
     activeEditorChangeListener,
+    selectionChangeListener,
     configChangeListener,
     refreshCommand,
     expandAllCommand,

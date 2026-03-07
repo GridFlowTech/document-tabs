@@ -11,6 +11,8 @@ import {
   isTabItem,
   isGroupItem,
   getTabUri,
+  getTabKey,
+  isTabDiff,
   getFileName,
   getFileExtension,
   getParentFolder,
@@ -171,9 +173,9 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
   private initializeTabOrder(): void {
     for (const group of vscode.window.tabGroups.all) {
       for (const tab of group.tabs) {
-        const uri = getTabUri(tab);
-        if (uri) {
-          this.tabOpenOrder.set(uri.toString(), this.orderCounter++);
+        const key = getTabKey(tab);
+        if (key) {
+          this.tabOpenOrder.set(key, this.orderCounter++);
         }
       }
     }
@@ -184,9 +186,9 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   trackNewTabs(tabs: readonly vscode.Tab[]): void {
     for (const tab of tabs) {
-      const uri = getTabUri(tab);
-      if (uri && !this.tabOpenOrder.has(uri.toString())) {
-        this.tabOpenOrder.set(uri.toString(), this.orderCounter++);
+      const key = getTabKey(tab);
+      if (key && !this.tabOpenOrder.has(key)) {
+        this.tabOpenOrder.set(key, this.orderCounter++);
       }
     }
 
@@ -200,9 +202,9 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   removeClosedTabs(tabs: readonly vscode.Tab[]): void {
     for (const tab of tabs) {
-      const uri = getTabUri(tab);
-      if (uri) {
-        this.tabOpenOrder.delete(uri.toString());
+      const key = getTabKey(tab);
+      if (key) {
+        this.tabOpenOrder.delete(key);
       }
     }
 
@@ -306,7 +308,9 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
       for (const tab of group.tabs) {
         const uri = getTabUri(tab);
         if (uri) {
-          const openedAt = this.tabOpenOrder.get(uri.toString()) ?? 0;
+          const key = getTabKey(tab);
+          const openedAt = this.tabOpenOrder.get(key ?? uri.toString()) ?? 0;
+          const isDiff = isTabDiff(tab);
 
           // Pre-compute project folder if needed (uses cache when available)
           let projectFolder: string | undefined;
@@ -318,9 +322,10 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
             type: 'tab',
             tab,
             uri,
-            label: getFileName(uri),
+            label: isDiff ? `${getFileName(uri)} (Working Tree)` : getFileName(uri),
             isPinned: tab.isPinned,
             isDirty: tab.isDirty,
+            isDiff,
             openedAt,
             projectFolder
           });
@@ -457,11 +462,19 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
     }
 
     // Set command to open the tab on click
-    treeItem.command = {
-      command: 'vscode.open',
-      title: 'Open File',
-      arguments: [tab.uri]
-    };
+    if (tab.isDiff && tab.tab.input instanceof vscode.TabInputTextDiff) {
+      treeItem.command = {
+        command: 'vscode.diff',
+        title: 'Open Diff',
+        arguments: [tab.tab.input.original, tab.tab.input.modified, tab.label]
+      };
+    } else {
+      treeItem.command = {
+        command: 'vscode.open',
+        title: 'Open File',
+        arguments: [tab.uri]
+      };
+    }
 
     // Set tooltip
     treeItem.tooltip = new vscode.MarkdownString();
@@ -588,7 +601,8 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   private buildParentLookup(groupItem: GroupItem): void {
     for (const tab of groupItem.tabs) {
-      this.parentLookupMap.set(tab.uri.toString(), groupItem);
+      const key = tab.isDiff ? tab.uri.toString() + '#diff' : tab.uri.toString();
+      this.parentLookupMap.set(key, groupItem);
     }
   }
 
@@ -598,8 +612,8 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   getParent(element: TreeViewItem): TreeViewItem | undefined {
     if (isTabItem(element)) {
-      // Use memoized parent lookup
-      return this.parentLookupMap.get(element.uri.toString());
+      const key = element.isDiff ? element.uri.toString() + '#diff' : element.uri.toString();
+      return this.parentLookupMap.get(key);
     }
     return undefined;
   }
@@ -609,7 +623,25 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   findTabByUri(uri: vscode.Uri): TabItem | undefined {
     const tabs = this.getAllTabs();
-    return tabs.find((t) => t.uri.toString() === uri.toString());
+    return tabs.find((t) => !t.isDiff && t.uri.toString() === uri.toString());
+  }
+
+  /**
+   * Find the TabItem matching the currently active VS Code tab.
+   * Correctly distinguishes between a regular file tab and its diff counterpart.
+   */
+  findActiveTab(): TabItem | undefined {
+    const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+    if (!activeTab) {
+      return undefined;
+    }
+    const key = getTabKey(activeTab);
+    if (!key) {
+      return undefined;
+    }
+    const tabs = this.getAllTabs();
+    const isDiff = isTabDiff(activeTab);
+    return tabs.find((t) => t.isDiff === isDiff && t.uri.toString() === (isDiff ? key.replace(/#diff$/, '') : key));
   }
 
   /**

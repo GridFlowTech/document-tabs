@@ -30,6 +30,7 @@ suite('types.ts — Type Guards', () => {
     label,
     isPinned: false,
     isDirty: false,
+    isDiff: false,
     openedAt: 1
   });
 
@@ -308,6 +309,7 @@ suite('types.ts — Type Interfaces', () => {
       label: 'test.ts',
       isPinned: false,
       isDirty: false,
+      isDiff: false,
       openedAt: 0
     };
     assert.strictEqual(item.type, 'tab');
@@ -325,6 +327,7 @@ suite('types.ts — Type Interfaces', () => {
       label: 'test.ts',
       isPinned: false,
       isDirty: false,
+      isDiff: false,
       openedAt: 0,
       groupName: 'src',
       projectFolder: 'MyApp'
@@ -355,6 +358,7 @@ suite('types.ts — Type Interfaces', () => {
       label: 'test.ts',
       isPinned: false,
       isDirty: false,
+      isDiff: false,
       openedAt: 0
     };
     const groupItem: TreeViewItem = {

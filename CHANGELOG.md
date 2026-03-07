@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-03-07
+
+### Added
+
+- Support for Git diff view tabs (Working Tree diffs now display as separate tabs)
+- Selection preservation when clicking dead space in Document Tabs tree view
+- New `isTabDiff()` type guard to detect diff tabs
+- New `getTabKey()` utility for unique tab identification (URI + diff flag)
+- New `findActiveTab()` method to correctly identify the active tab type
+
+### Fixed
+
+- Diff view tabs now display as distinct entries with "(Working Tree)" suffix
+- Clicking diff tabs now opens the diff view instead of the regular file
+- Selection no longer clears when clicking empty space; active file stays highlighted
+- Parent lookup and tab tracking now use composite keys to avoid collisions between files and their diffs
+
 ## [1.0.6] - 2026-02-11
 
 ### Added
