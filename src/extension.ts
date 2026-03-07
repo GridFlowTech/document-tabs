@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { DocumentTabsProvider } from './tabsProvider';
-import { TreeViewItem, isTabItem, isGroupItem, getTabUri } from './types';
+import { TreeViewItem, TabItem, isTabItem, isGroupItem } from './types';
 
 /**
  * Updates the context keys for sort and group settings.
@@ -69,15 +69,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  // Reveal currently active file when tree view becomes visible
-  let hasRevealedOnStartup = false;
+  // Reveal active tab when tree view becomes visible
   const visibilityChangeListener = treeView.onDidChangeVisibility(async (e) => {
-    if (e.visible && !hasRevealedOnStartup) {
-      hasRevealedOnStartup = true;
-      const activeEditor = vscode.window.activeTextEditor;
-      if (activeEditor) {
-        await revealActiveTab();
-      }
+    if (e.visible) {
+      await revealActiveTab();
     }
   });
 
@@ -118,6 +113,32 @@ export function activate(context: vscode.ExtensionContext) {
   const activeEditorChangeListener = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
     if (editor) {
       await revealActiveTab();
+    }
+  });
+
+  // Also listen for generic tab activation (covers webview/terminal tabs
+  // which don't trigger onDidChangeActiveTextEditor)
+  const activeTabChangeListener = vscode.window.tabGroups.onDidChangeTabs(async (event) => {
+    if (event.changed.length > 0) {
+      // A tab changed (possibly became active) — try to reveal it
+      const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+      if (activeTab && !activeTab.input) {
+        // Unknown input type (not a text editor) — reveal it
+        await revealActiveTab();
+      } else if (activeTab) {
+        const input = activeTab.input;
+        // Non-text tabs: anything that isn't TabInputText, TabInputTextDiff,
+        // TabInputNotebook, TabInputNotebookDiff, TabInputCustom
+        const isTextBased =
+          input instanceof vscode.TabInputText ||
+          input instanceof vscode.TabInputTextDiff ||
+          input instanceof vscode.TabInputNotebook ||
+          input instanceof vscode.TabInputNotebookDiff ||
+          input instanceof vscode.TabInputCustom;
+        if (!isTextBased) {
+          await revealActiveTab();
+        }
+      }
     }
   });
 
@@ -392,7 +413,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorNoneCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.none',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.clearManualTabColor(item.uri);
         } catch (error) {
@@ -405,7 +426,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorLavenderCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.lavender',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'lavender');
         } catch (error) {
@@ -418,7 +439,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorGoldCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.gold',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'gold');
         } catch (error) {
@@ -431,7 +452,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorCyanCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.cyan',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'cyan');
         } catch (error) {
@@ -444,7 +465,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorBurgundyCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.burgundy',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'burgundy');
         } catch (error) {
@@ -457,7 +478,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorGreenCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.green',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'green');
         } catch (error) {
@@ -470,7 +491,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorBrownCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.brown',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'brown');
         } catch (error) {
@@ -483,7 +504,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorRoyalBlueCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.royalBlue',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'royalBlue');
         } catch (error) {
@@ -496,7 +517,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorPumpkinCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.pumpkin',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'pumpkin');
         } catch (error) {
@@ -509,7 +530,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorGrayCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.gray',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'gray');
         } catch (error) {
@@ -522,7 +543,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorVoltCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.volt',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'volt');
         } catch (error) {
@@ -535,7 +556,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorTealCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.teal',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'teal');
         } catch (error) {
@@ -548,7 +569,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorMagentaCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.magenta',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'magenta');
         } catch (error) {
@@ -561,7 +582,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorMintCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.mint',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'mint');
         } catch (error) {
@@ -574,7 +595,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorDarkBrownCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.darkBrown',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'darkBrown');
         } catch (error) {
@@ -587,7 +608,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorBlueCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.blue',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'blue');
         } catch (error) {
@@ -600,7 +621,7 @@ export function activate(context: vscode.ExtensionContext) {
   const setTabColorPinkCommand = vscode.commands.registerCommand(
     'documentTabs.setTabColor.pink',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await tabsProvider.setManualTabColorByName(item.uri, 'pink');
         } catch (error) {
@@ -631,8 +652,7 @@ export function activate(context: vscode.ExtensionContext) {
           const tabsToClose = vscode.window.tabGroups.all
             .flatMap((group) => group.tabs)
             .filter((tab) => {
-              const uri = getTabUri(tab);
-              return uri && uri.toString() !== item.uri.toString() && !tab.isPinned;
+              return tab !== item.tab && !tab.isPinned;
             });
           await vscode.window.tabGroups.close(tabsToClose);
         } catch (error) {
@@ -686,7 +706,9 @@ export function activate(context: vscode.ExtensionContext) {
   const pinTabCommand = vscode.commands.registerCommand('documentTabs.pinTab', async (item: TreeViewItem) => {
     if (isTabItem(item)) {
       try {
-        await vscode.window.showTextDocument(item.uri, { preview: false });
+        if (item.uri) {
+          await vscode.window.showTextDocument(item.uri, { preview: false });
+        }
         await vscode.commands.executeCommand('workbench.action.pinEditor');
         scheduleRefresh();
       } catch (error) {
@@ -700,7 +722,9 @@ export function activate(context: vscode.ExtensionContext) {
     async (item: TreeViewItem) => {
       if (isTabItem(item)) {
         try {
-          await vscode.window.showTextDocument(item.uri, { preview: false });
+          if (item.uri) {
+            await vscode.window.showTextDocument(item.uri, { preview: false });
+          }
           await vscode.commands.executeCommand('workbench.action.unpinEditor');
           scheduleRefresh();
         } catch (error) {
@@ -713,7 +737,7 @@ export function activate(context: vscode.ExtensionContext) {
   const copyPathCommand = vscode.commands.registerCommand(
     'documentTabs.copyPath',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await vscode.env.clipboard.writeText(item.uri.fsPath);
           vscode.window.showInformationMessage('Path copied to clipboard');
@@ -727,7 +751,7 @@ export function activate(context: vscode.ExtensionContext) {
   const copyRelativePathCommand = vscode.commands.registerCommand(
     'documentTabs.copyRelativePath',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await vscode.env.clipboard.writeText(vscode.workspace.asRelativePath(item.uri));
           vscode.window.showInformationMessage('Relative path copied to clipboard');
@@ -741,7 +765,7 @@ export function activate(context: vscode.ExtensionContext) {
   const revealInExplorerCommand = vscode.commands.registerCommand(
     'documentTabs.revealInExplorer',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await vscode.commands.executeCommand('revealInExplorer', item.uri);
         } catch (error) {
@@ -754,7 +778,7 @@ export function activate(context: vscode.ExtensionContext) {
   const openToSideCommand = vscode.commands.registerCommand(
     'documentTabs.openToSide',
     async (item: TreeViewItem) => {
-      if (isTabItem(item)) {
+      if (isTabItem(item) && item.uri) {
         try {
           await vscode.window.showTextDocument(item.uri, { viewColumn: vscode.ViewColumn.Beside });
         } catch (error) {
@@ -771,18 +795,19 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      const activeUri = vscode.window.activeTextEditor?.document.uri;
+      const activeTab = tabsProvider.findActiveTab();
       let nextIndex = 0;
 
-      if (activeUri) {
-        const currentIndex = orderedTabs.findIndex((t) => t.uri.toString() === activeUri.toString());
+      if (activeTab) {
+        const currentIndex = orderedTabs.findIndex((t) => t.tabKey === activeTab.tabKey);
         if (currentIndex !== -1) {
           nextIndex = (currentIndex + 1) % orderedTabs.length;
         }
       }
 
-      if (orderedTabs[nextIndex]) {
-        await vscode.window.showTextDocument(orderedTabs[nextIndex].uri, { preview: false });
+      const target = orderedTabs[nextIndex];
+      if (target?.uri) {
+        await vscode.window.showTextDocument(target.uri, { preview: false });
       }
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to navigate to next tab: ${error}`);
@@ -796,23 +821,57 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      const activeUri = vscode.window.activeTextEditor?.document.uri;
+      const activeTab = tabsProvider.findActiveTab();
       let prevIndex = orderedTabs.length - 1;
 
-      if (activeUri) {
-        const currentIndex = orderedTabs.findIndex((t) => t.uri.toString() === activeUri.toString());
+      if (activeTab) {
+        const currentIndex = orderedTabs.findIndex((t) => t.tabKey === activeTab.tabKey);
         if (currentIndex !== -1) {
           prevIndex = (currentIndex - 1 + orderedTabs.length) % orderedTabs.length;
         }
       }
 
-      if (orderedTabs[prevIndex]) {
-        await vscode.window.showTextDocument(orderedTabs[prevIndex].uri, { preview: false });
+      const target = orderedTabs[prevIndex];
+      if (target?.uri) {
+        await vscode.window.showTextDocument(target.uri, { preview: false });
       }
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to navigate to previous tab: ${error}`);
     }
   });
+
+  // Activate a non-file tab (webview, terminal) by focusing its editor group
+  // and navigating to it by index — works for ALL tab types generically.
+  const activateTabCommand = vscode.commands.registerCommand(
+    'documentTabs.activateTab',
+    async (item: TabItem) => {
+      try {
+        const vsTab = item.tab;
+        const group = vsTab.group;
+        const index = group.tabs.indexOf(vsTab);
+
+        // Focus the correct editor group by view column
+        const focusCommands: Record<number, string> = {
+          1: 'workbench.action.focusFirstEditorGroup',
+          2: 'workbench.action.focusSecondEditorGroup',
+          3: 'workbench.action.focusThirdEditorGroup',
+          4: 'workbench.action.focusFourthEditorGroup',
+          5: 'workbench.action.focusFifthEditorGroup'
+        };
+        const col = group.viewColumn;
+        if (col !== undefined && focusCommands[col]) {
+          await vscode.commands.executeCommand(focusCommands[col]);
+        }
+
+        // Navigate to the tab by its 1-based index within the group
+        if (index >= 0) {
+          await vscode.commands.executeCommand('workbench.action.openEditorAtIndex', index);
+        }
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to activate tab: ${error}`);
+      }
+    }
+  );
 
   // Push all subscriptions to context
   context.subscriptions.push(
@@ -821,6 +880,7 @@ export function activate(context: vscode.ExtensionContext) {
     tabGroupChangeListener,
     visibilityChangeListener,
     activeEditorChangeListener,
+    activeTabChangeListener,
     selectionChangeListener,
     configChangeListener,
     refreshCommand,
@@ -875,7 +935,8 @@ export function activate(context: vscode.ExtensionContext) {
     revealInExplorerCommand,
     openToSideCommand,
     nextTabCommand,
-    previousTabCommand
+    previousTabCommand,
+    activateTabCommand
   );
 }
 

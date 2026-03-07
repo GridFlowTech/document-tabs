@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-03-07
+
+### Added
+
+- Support for non-file tabs: Settings, Keybindings, Extensions, and any third-party webview tabs
+- Browser-style tab navigation: click any open tab in Document Tabs to focus it (works for all tab types)
+- New "System Tabs" group for organizing Settings, Keybindings, Extensions, and other webview/terminal tabs
+- Universal tab activation mechanism using editor group focus and tab index navigation
+
+### Changed
+
+- Tab identity system now supports all VS Code tab input types (webview, terminal, in addition to file-based)
+- Improved type detection with duck-typing fallbacks for forward compatibility with future VS Code API changes
+- Tab highlighting now works for all tab types when switching between editor and Document Tabs view
+
+### Fixed
+
+- Non-file tabs (Settings, Keybindings, Extensions) now appear in the tree view
+- Clicking Settings/Keybindings/Extension tabs now correctly focuses them
+- Tab selection highlighting preserved when switching back to Document Tabs view
+- Generic tab activation works for third-party webview extensions without custom command mapping
+
 ## [1.0.7] - 2026-03-07
 
 ### Added
@@ -128,7 +150,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.8...HEAD
+[1.0.8]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.7...v1.0.8
+[1.0.7]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.3...v1.0.4

@@ -2,7 +2,7 @@
   "name": "document-tabs",
   "displayName": "Document Tabs",
   "description": "A Visual Studio-style vertical tab grouping view for VS Code. Shows currently open tabs in a sidebar with grouping, sorting, and tab management features.",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "license": "MIT",
   "publisher": "GridFlowTech",
   "engines": {
@@ -322,6 +322,11 @@
         "command": "documentTabs.previousTab",
         "title": "Go to Previous Tab (Document Tabs Order)",
         "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.activateTab",
+        "title": "Activate Tab",
+        "category": "Document Tabs"
       }
     ],
     "menus": {
@@ -450,32 +455,32 @@
       "view/item/context": [
         {
           "command": "documentTabs.closeTab",
-          "when": "view == documentTabsView && viewItem == tab",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == nonFileTab)",
           "group": "inline@1"
         },
         {
           "command": "documentTabs.pinTab",
-          "when": "view == documentTabsView && viewItem == tab",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == nonFileTab)",
           "group": "inline@2"
         },
         {
           "command": "documentTabs.unpinTab",
-          "when": "view == documentTabsView && viewItem == pinnedTab",
+          "when": "view == documentTabsView && (viewItem == pinnedTab || viewItem == pinnedNonFileTab)",
           "group": "inline@2"
         },
         {
           "command": "documentTabs.closeTab",
-          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab || viewItem == nonFileTab || viewItem == pinnedNonFileTab)",
           "group": "1_close@1"
         },
         {
           "command": "documentTabs.closeOtherTabs",
-          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab || viewItem == nonFileTab || viewItem == pinnedNonFileTab)",
           "group": "1_close@2"
         },
         {
           "command": "documentTabs.closeTabsToTheRight",
-          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab)",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == pinnedTab || viewItem == nonFileTab || viewItem == pinnedNonFileTab)",
           "group": "1_close@3"
         },
         {
@@ -485,12 +490,12 @@
         },
         {
           "command": "documentTabs.pinTab",
-          "when": "view == documentTabsView && viewItem == tab",
+          "when": "view == documentTabsView && (viewItem == tab || viewItem == nonFileTab)",
           "group": "2_pin@1"
         },
         {
           "command": "documentTabs.unpinTab",
-          "when": "view == documentTabsView && viewItem == pinnedTab",
+          "when": "view == documentTabsView && (viewItem == pinnedTab || viewItem == pinnedNonFileTab)",
           "group": "2_pin@1"
         },
         {

@@ -55,16 +55,23 @@ export interface DocumentTabsConfig {
 }
 
 /**
+ * Discriminates the kind of editor a tab represents.
+ */
+export type TabKind = 'file' | 'diff' | 'webview' | 'terminal';
+
+/**
  * Represents a tab item in the tree view
  */
 export interface TabItem {
   type: 'tab';
   tab: vscode.Tab;
-  uri: vscode.Uri;
+  tabKey: string;
+  tabKind: TabKind;
+  uri?: vscode.Uri;
+  viewType?: string;
   label: string;
   isPinned: boolean;
   isDirty: boolean;
-  isDiff: boolean;
   openedAt: number;
   groupName?: string;
   projectFolder?: string;
@@ -132,14 +139,108 @@ export function isTabDiff(tab: vscode.Tab): boolean {
 }
 
 /**
- * Unique key for a tab — differentiates regular files from their diff counterparts.
+ * Returns the TabKind for a VS Code Tab.
  */
-export function getTabKey(tab: vscode.Tab): string | undefined {
-  const uri = getTabUri(tab);
-  if (!uri) {
-    return undefined;
+export function getTabKind(tab: vscode.Tab): TabKind {
+  const input = tab.input;
+  if (input instanceof vscode.TabInputTextDiff || input instanceof vscode.TabInputNotebookDiff) {
+    return 'diff';
   }
-  return isTabDiff(tab) ? uri.toString() + '#diff' : uri.toString();
+  if (input instanceof vscode.TabInputWebview) {
+    return 'webview';
+  }
+  if (input instanceof vscode.TabInputTerminal) {
+    return 'terminal';
+  }
+  // File-backed tabs: TabInputText, TabInputNotebook, TabInputCustom
+  if (
+    input instanceof vscode.TabInputText ||
+    input instanceof vscode.TabInputNotebook ||
+    input instanceof vscode.TabInputCustom
+  ) {
+    return 'file';
+  }
+  // Duck-type detection for unknown input types (e.g. future API additions)
+  if (input && typeof input === 'object') {
+    if ('viewType' in input && !('uri' in input)) {
+      return 'webview';
+    }
+  }
+  // Truly unknown — treat as webview so it still appears in the tree
+  if (input === undefined || input === null) {
+    return 'webview';
+  }
+  return 'webview';
+}
+
+/**
+ * Returns the viewType for a webview or custom tab, or undefined.
+ */
+export function getWebviewViewType(tab: vscode.Tab): string | undefined {
+  const input = tab.input;
+  if (input instanceof vscode.TabInputWebview) {
+    return input.viewType;
+  }
+  if (input instanceof vscode.TabInputCustom) {
+    return input.viewType;
+  }
+  // Duck-type fallback for unknown input objects
+  if (input && typeof input === 'object' && 'viewType' in input) {
+    return String((input as Record<string, unknown>).viewType);
+  }
+  return undefined;
+}
+
+/**
+ * Unique key for a tab — differentiates all tab types.
+ */
+export function getTabKey(tab: vscode.Tab): string {
+  const kind = getTabKind(tab);
+  switch (kind) {
+    case 'webview': {
+      const vt = getWebviewViewType(tab) ?? 'unknown';
+      return `webview:${vt}:${tab.label}`;
+    }
+    case 'terminal':
+      return `terminal:${tab.label}`;
+    case 'diff': {
+      const uri = getTabUri(tab);
+      return uri ? uri.toString() + '#diff' : `diff:${tab.label}`;
+    }
+    default: {
+      const uri = getTabUri(tab);
+      return uri ? uri.toString() : `unknown:${tab.label}`;
+    }
+  }
+}
+
+/**
+ * Known webview viewType → activation command mapping.
+ */
+const webviewActivationCommands: Record<string, string> = {
+  'workbench.settings.editor': 'workbench.action.openSettings2',
+  'workbench.keybindings.editor': 'workbench.action.openGlobalKeybindings',
+  'workbench.releaseNotes': 'update.showCurrentReleaseNotes',
+  'workbench.welcome': 'workbench.action.showWelcomePage',
+  'mainThreadWebview-markdown.preview': 'markdown.showPreview',
+  'mainThreadWebview-searchEditor': 'search.action.openEditor'
+};
+
+/**
+ * Returns the activation command for a known webview viewType, or undefined.
+ */
+export function getWebviewActivationCommand(viewType: string): string | undefined {
+  // Direct match
+  if (webviewActivationCommands[viewType]) {
+    return webviewActivationCommands[viewType];
+  }
+  // Some viewTypes are prefixed (e.g. mainThreadWebview-...)
+  for (const [key, cmd] of Object.entries(webviewActivationCommands)) {
+    if (viewType.includes(key)) {
+      return cmd;
+    }
+  }
+  return undefined;
 }
 
 /**

@@ -289,7 +289,8 @@ suite('DocumentTabsProvider — getChildren()', () => {
       label: 'a.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
     const tab2: TabItem = {
@@ -299,7 +300,8 @@ suite('DocumentTabsProvider — getChildren()', () => {
       label: 'b.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 2
     };
 
@@ -327,7 +329,8 @@ suite('DocumentTabsProvider — getChildren()', () => {
       label: 'a.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -360,7 +363,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -381,7 +385,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -400,7 +405,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
       label: 'file.ts',
       isPinned: true,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -419,7 +425,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
       label: 'file.ts',
       isPinned: true,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -438,7 +445,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: true,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -457,7 +465,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
       label: 'file.ts',
       isPinned: true,
       isDirty: true,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -478,7 +487,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -501,7 +511,8 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
           label: 't.ts',
           isPinned: false,
           isDirty: false,
-          isDiff: false,
+          tabKind: 'file',
+          tabKey: 'test-key',
           openedAt: 0
         }
       ],
@@ -583,7 +594,8 @@ suite('DocumentTabsProvider — getParent()', () => {
       label: 'orphan.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -780,7 +792,8 @@ suite('DocumentTabsProvider — Manual Tab Colors', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -835,7 +848,8 @@ suite('DocumentTabsProvider — Color Determinism (hashString)', () => {
       label: 'file1.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1,
       projectFolder: 'MyApp'
     };
@@ -847,7 +861,8 @@ suite('DocumentTabsProvider — Color Determinism (hashString)', () => {
       label: 'file2.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 2,
       projectFolder: 'MyApp'
     };
@@ -894,7 +909,8 @@ suite('DocumentTabsProvider — Color Determinism (hashString)', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -905,7 +921,8 @@ suite('DocumentTabsProvider — Color Determinism (hashString)', () => {
       label: 'file.json',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 2
     };
 
@@ -1004,7 +1021,8 @@ suite('DocumentTabsProvider — Description (showPath)', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -1038,7 +1056,8 @@ suite('DocumentTabsProvider — Description (showPath)', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -1074,7 +1093,8 @@ suite('DocumentTabsProvider — File Icons (showFileIcons)', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 
@@ -1107,7 +1127,8 @@ suite('DocumentTabsProvider — File Icons (showFileIcons)', () => {
       label: 'file.ts',
       isPinned: false,
       isDirty: false,
-      isDiff: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
       openedAt: 1
     };
 

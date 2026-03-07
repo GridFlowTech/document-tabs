@@ -12,7 +12,8 @@ import {
   isGroupItem,
   getTabUri,
   getTabKey,
-  isTabDiff,
+  getTabKind,
+  getWebviewViewType,
   getFileName,
   getFileExtension,
   getParentFolder,
@@ -125,6 +126,10 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
   };
 
   private getEffectiveTabColor(tab: TabItem, config: DocumentTabsConfig): TabColorName {
+    if (!tab.uri) {
+      return 'none';
+    }
+
     const manualColors = this.getManualTabColors();
     const manual = manualColors[tab.uri.toString()];
     if (manual) {
@@ -174,9 +179,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
     for (const group of vscode.window.tabGroups.all) {
       for (const tab of group.tabs) {
         const key = getTabKey(tab);
-        if (key) {
-          this.tabOpenOrder.set(key, this.orderCounter++);
-        }
+        this.tabOpenOrder.set(key, this.orderCounter++);
       }
     }
   }
@@ -187,7 +190,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
   trackNewTabs(tabs: readonly vscode.Tab[]): void {
     for (const tab of tabs) {
       const key = getTabKey(tab);
-      if (key && !this.tabOpenOrder.has(key)) {
+      if (!this.tabOpenOrder.has(key)) {
         this.tabOpenOrder.set(key, this.orderCounter++);
       }
     }
@@ -203,9 +206,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
   removeClosedTabs(tabs: readonly vscode.Tab[]): void {
     for (const tab of tabs) {
       const key = getTabKey(tab);
-      if (key) {
-        this.tabOpenOrder.delete(key);
-      }
+      this.tabOpenOrder.delete(key);
     }
 
     if (tabs.length > 0) {
@@ -306,11 +307,27 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
 
     for (const group of vscode.window.tabGroups.all) {
       for (const tab of group.tabs) {
+        const tabKind = getTabKind(tab);
+        const key = getTabKey(tab);
+        const openedAt = this.tabOpenOrder.get(key) ?? 0;
         const uri = getTabUri(tab);
-        if (uri) {
-          const key = getTabKey(tab);
-          const openedAt = this.tabOpenOrder.get(key ?? uri.toString()) ?? 0;
-          const isDiff = isTabDiff(tab);
+
+        if (tabKind === 'webview' || tabKind === 'terminal') {
+          // Non-file tab — use VS Code's tab label directly
+          tabs.push({
+            type: 'tab',
+            tab,
+            tabKey: key,
+            tabKind,
+            uri: undefined,
+            viewType: getWebviewViewType(tab),
+            label: tab.label,
+            isPinned: tab.isPinned,
+            isDirty: tab.isDirty,
+            openedAt
+          });
+        } else if (uri) {
+          const isDiff = tabKind === 'diff';
 
           // Pre-compute project folder if needed (uses cache when available)
           let projectFolder: string | undefined;
@@ -321,11 +338,12 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
           tabs.push({
             type: 'tab',
             tab,
+            tabKey: key,
+            tabKind,
             uri,
             label: isDiff ? `${getFileName(uri)} (Working Tree)` : getFileName(uri),
             isPinned: tab.isPinned,
             isDirty: tab.isDirty,
-            isDiff,
             openedAt,
             projectFolder
           });
@@ -374,16 +392,27 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
     for (const tab of tabs) {
       let groupName: string;
 
+      // Non-file tabs go into a special group
+      if (!tab.uri) {
+        groupName = config.groupBy === 'none' ? '' : 'System Tabs';
+        tab.groupName = groupName;
+        if (!groups.has(groupName)) {
+          groups.set(groupName, []);
+        }
+        groups.get(groupName)!.push(tab);
+        continue;
+      }
+
       switch (config.groupBy) {
         case 'folder':
-          groupName = getParentFolder(tab.uri);
+          groupName = getParentFolder(tab.uri!);
           break;
         case 'extension':
-          groupName = getFileExtension(tab.uri);
+          groupName = getFileExtension(tab.uri!);
           break;
         case 'project':
           // Use pre-computed projectFolder or fall back to getProjectFolder
-          groupName = tab.projectFolder ?? getProjectFolder(tab.uri);
+          groupName = tab.projectFolder ?? getProjectFolder(tab.uri!);
           break;
         case 'none':
         default:
@@ -424,21 +453,28 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
     // TabItem
     const tab = element;
     const treeItem = new vscode.TreeItem(tab.label);
+    const isFileTab = tab.tabKind === 'file' || tab.tabKind === 'diff';
 
-    // Tab coloring (manual overrides, or auto based on config)
-    const tabColor = this.getEffectiveTabColor(tab, config);
-    if (tabColor !== 'none') {
-      const themeColorId = DocumentTabsProvider.themeColorByTabColor[tabColor];
-      treeItem.iconPath = new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor(themeColorId));
+    // Tab coloring (only for file-based tabs)
+    if (isFileTab) {
+      const tabColor = this.getEffectiveTabColor(tab, config);
+      if (tabColor !== 'none') {
+        const themeColorId = DocumentTabsProvider.themeColorByTabColor[tabColor];
+        treeItem.iconPath = new vscode.ThemeIcon('circle-filled', new vscode.ThemeColor(themeColorId));
+      }
     }
 
-    // Set description (path)
-    if (config.showPath) {
+    // Set description (path) — only for file-based tabs
+    if (config.showPath && tab.uri) {
       treeItem.description = getRelativePath(tab.uri);
     }
 
     // Set icon
-    if (config.showFileIcons) {
+    if (tab.tabKind === 'webview') {
+      treeItem.iconPath = treeItem.iconPath ?? new vscode.ThemeIcon('globe');
+    } else if (tab.tabKind === 'terminal') {
+      treeItem.iconPath = treeItem.iconPath ?? new vscode.ThemeIcon('terminal');
+    } else if (config.showFileIcons && tab.uri) {
       treeItem.resourceUri = tab.uri;
     } else {
       treeItem.iconPath = treeItem.iconPath ?? new vscode.ThemeIcon('file');
@@ -449,26 +485,32 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
       treeItem.label = `● ${tab.label}`;
     }
 
-    // Set pinned indicator
+    // Set pinned indicator and context value
     if (tab.isPinned) {
-      treeItem.contextValue = 'pinnedTab';
+      treeItem.contextValue = isFileTab ? 'pinnedTab' : 'pinnedNonFileTab';
       if (!tab.isDirty) {
         treeItem.label = `📌 ${tab.label}`;
       } else {
         treeItem.label = `📌 ● ${tab.label}`;
       }
     } else {
-      treeItem.contextValue = 'tab';
+      treeItem.contextValue = isFileTab ? 'tab' : 'nonFileTab';
     }
 
-    // Set command to open the tab on click
-    if (tab.isDiff && tab.tab.input instanceof vscode.TabInputTextDiff) {
+    // Set command to open/activate the tab on click
+    if (tab.tabKind === 'diff' && tab.tab.input instanceof vscode.TabInputTextDiff) {
       treeItem.command = {
         command: 'vscode.diff',
         title: 'Open Diff',
         arguments: [tab.tab.input.original, tab.tab.input.modified, tab.label]
       };
-    } else {
+    } else if (tab.tabKind === 'webview' || tab.tabKind === 'terminal') {
+      treeItem.command = {
+        command: 'documentTabs.activateTab',
+        title: 'Activate Tab',
+        arguments: [tab]
+      };
+    } else if (tab.uri) {
       treeItem.command = {
         command: 'vscode.open',
         title: 'Open File',
@@ -479,7 +521,11 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
     // Set tooltip
     treeItem.tooltip = new vscode.MarkdownString();
     treeItem.tooltip.appendMarkdown(`**${tab.label}**\n\n`);
-    treeItem.tooltip.appendMarkdown(`Path: \`${tab.uri.fsPath}\`\n\n`);
+    if (tab.uri) {
+      treeItem.tooltip.appendMarkdown(`Path: \`${tab.uri.fsPath}\`\n\n`);
+    } else if (tab.viewType) {
+      treeItem.tooltip.appendMarkdown(`Type: ${tab.viewType}\n\n`);
+    }
     if (tab.isPinned) {
       treeItem.tooltip.appendMarkdown(`📌 Pinned\n`);
     }
@@ -601,8 +647,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   private buildParentLookup(groupItem: GroupItem): void {
     for (const tab of groupItem.tabs) {
-      const key = tab.isDiff ? tab.uri.toString() + '#diff' : tab.uri.toString();
-      this.parentLookupMap.set(key, groupItem);
+      this.parentLookupMap.set(tab.tabKey, groupItem);
     }
   }
 
@@ -612,8 +657,7 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   getParent(element: TreeViewItem): TreeViewItem | undefined {
     if (isTabItem(element)) {
-      const key = element.isDiff ? element.uri.toString() + '#diff' : element.uri.toString();
-      return this.parentLookupMap.get(key);
+      return this.parentLookupMap.get(element.tabKey);
     }
     return undefined;
   }
@@ -623,12 +667,12 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
    */
   findTabByUri(uri: vscode.Uri): TabItem | undefined {
     const tabs = this.getAllTabs();
-    return tabs.find((t) => !t.isDiff && t.uri.toString() === uri.toString());
+    return tabs.find((t) => t.tabKind === 'file' && t.uri?.toString() === uri.toString());
   }
 
   /**
    * Find the TabItem matching the currently active VS Code tab.
-   * Correctly distinguishes between a regular file tab and its diff counterpart.
+   * Works for all tab kinds (file, diff, webview, terminal).
    */
   findActiveTab(): TabItem | undefined {
     const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
@@ -636,12 +680,8 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
       return undefined;
     }
     const key = getTabKey(activeTab);
-    if (!key) {
-      return undefined;
-    }
     const tabs = this.getAllTabs();
-    const isDiff = isTabDiff(activeTab);
-    return tabs.find((t) => t.isDiff === isDiff && t.uri.toString() === (isDiff ? key.replace(/#diff$/, '') : key));
+    return tabs.find((t) => t.tabKey === key);
   }
 
   /**
