@@ -61,7 +61,8 @@ const ALL_COMMANDS = [
   'documentTabs.revealInExplorer',
   'documentTabs.openToSide',
   'documentTabs.nextTab',
-  'documentTabs.previousTab'
+  'documentTabs.previousTab',
+  'documentTabs.compareSelected'
 ];
 
 suite('Extension — Activation', () => {
@@ -401,6 +402,14 @@ suite('Extension — Tab Operations', () => {
   test('openToSide command handles missing item gracefully', async () => {
     try {
       await vscode.commands.executeCommand('documentTabs.openToSide');
+    } catch (e) {
+      assert.ok(e instanceof TypeError);
+    }
+  });
+
+  test('compareSelected command handles missing items gracefully', async () => {
+    try {
+      await vscode.commands.executeCommand('documentTabs.compareSelected');
     } catch (e) {
       assert.ok(e instanceof TypeError);
     }

@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
   const treeView = vscode.window.createTreeView('documentTabsView', {
     treeDataProvider: tabsProvider,
     showCollapseAll: true,
-    canSelectMany: false
+    canSelectMany: true
   });
 
   // Set tree view reference for badge updates
@@ -703,12 +703,33 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  const focusTab = async (item: TabItem): Promise<void> => {
+    if (item.tabKind === 'file' && item.uri) {
+      await vscode.window.showTextDocument(item.uri, { preview: false });
+    } else {
+      const group = item.tab.group;
+      const index = group.tabs.indexOf(item.tab);
+      const focusCommands: Record<number, string> = {
+        1: 'workbench.action.focusFirstEditorGroup',
+        2: 'workbench.action.focusSecondEditorGroup',
+        3: 'workbench.action.focusThirdEditorGroup',
+        4: 'workbench.action.focusFourthEditorGroup',
+        5: 'workbench.action.focusFifthEditorGroup'
+      };
+      const col = group.viewColumn;
+      if (col !== undefined && focusCommands[col]) {
+        await vscode.commands.executeCommand(focusCommands[col]);
+      }
+      if (index >= 0) {
+        await vscode.commands.executeCommand('workbench.action.openEditorAtIndex', index);
+      }
+    }
+  };
+
   const pinTabCommand = vscode.commands.registerCommand('documentTabs.pinTab', async (item: TreeViewItem) => {
     if (isTabItem(item)) {
       try {
-        if (item.uri) {
-          await vscode.window.showTextDocument(item.uri, { preview: false });
-        }
+        await focusTab(item);
         await vscode.commands.executeCommand('workbench.action.pinEditor');
         scheduleRefresh();
       } catch (error) {
@@ -722,9 +743,7 @@ export function activate(context: vscode.ExtensionContext) {
     async (item: TreeViewItem) => {
       if (isTabItem(item)) {
         try {
-          if (item.uri) {
-            await vscode.window.showTextDocument(item.uri, { preview: false });
-          }
+          await focusTab(item);
           await vscode.commands.executeCommand('workbench.action.unpinEditor');
           scheduleRefresh();
         } catch (error) {
@@ -873,6 +892,25 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const compareSelectedCommand = vscode.commands.registerCommand(
+    'documentTabs.compareSelected',
+    async (item: TreeViewItem, selectedItems: TreeViewItem[]) => {
+      try {
+        const items = selectedItems ?? (item ? [item] : []);
+        const fileItems = items.filter((i): i is TabItem => isTabItem(i) && !!i.uri);
+        if (fileItems.length !== 2) {
+          vscode.window.showWarningMessage('Select exactly 2 file tabs to compare.');
+          return;
+        }
+        const [left, right] = fileItems;
+        const title = `${left.label} ↔ ${right.label}`;
+        await vscode.commands.executeCommand('vscode.diff', left.uri, right.uri, title);
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to compare files: ${error}`);
+      }
+    }
+  );
+
   // Push all subscriptions to context
   context.subscriptions.push(
     treeView,
@@ -936,7 +974,8 @@ export function activate(context: vscode.ExtensionContext) {
     openToSideCommand,
     nextTabCommand,
     previousTabCommand,
-    activateTabCommand
+    activateTabCommand,
+    compareSelectedCommand
   );
 }
 

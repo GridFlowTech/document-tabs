@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.9] - 2026-03-18
+
+### Added
+
+- "Compare Selected" context menu option: select two file tabs and compare them in a diff view
+
+### Fixed
+
+- System tabs (Settings, Keybindings, Extensions) can now be pinned without requiring selection first
+- Working Tree diff tabs are now pinnable
+
 ## [1.0.8] - 2026-03-07
 
 ### Added
@@ -150,7 +161,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.8...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.9...HEAD
+[1.0.9]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.5...v1.0.6

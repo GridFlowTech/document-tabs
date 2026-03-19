@@ -36,6 +36,7 @@ A Visual Studio-style vertical tab grouping view for VS Code. This extension pro
 ### ⚡ Quick Actions
 
 - **Click** to open/focus a tab
+- **Compare Selected** - Compare two selected file tabs in a side-by-side diff view
 - **Next/Previous Tab** - Navigate tabs in Document Tabs order (Alt+PageDown / Alt+PageUp)
 - **Close** individual tabs or groups
 - **Close Others** - Close all tabs except the selected one
