@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.10] - 2026-03-22
+
+### Added
+
+- Dedicated "Terminals" group: terminal tabs now appear in their own group separate from other system tabs (Settings, Keybindings, etc.) when grouping is enabled
+- "New Terminal" button (+) on the Terminals group header to quickly create a terminal editor tab
+- Terminal icon for the Terminals group to distinguish it from folder-based groups
+
+### Fixed
+
+- "Cannot resolve tree item for element" error caused by reveal racing with tree refresh on tab open/close events
+
 ## [1.0.9] - 2026-03-18
 
 ### Added
@@ -161,7 +173,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.9...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.10...HEAD
+[1.0.10]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.7...v1.0.8
 [1.0.7]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.6...v1.0.7

@@ -394,7 +394,11 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
 
       // Non-file tabs go into a special group
       if (!tab.uri) {
-        groupName = config.groupBy === 'none' ? '' : 'System Tabs';
+        if (config.groupBy === 'none') {
+          groupName = '';
+        } else {
+          groupName = tab.tabKind === 'terminal' ? 'Terminals' : 'System Tabs';
+        }
         tab.groupName = groupName;
         if (!groups.has(groupName)) {
           groups.set(groupName, []);
@@ -444,9 +448,14 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
 
     if (isGroupItem(element)) {
       const treeItem = new vscode.TreeItem(element.name || 'Ungrouped', element.collapsibleState);
-      treeItem.contextValue = 'group';
+      if (element.name === 'Terminals') {
+        treeItem.contextValue = 'terminalGroup';
+        treeItem.iconPath = new vscode.ThemeIcon('terminal');
+      } else {
+        treeItem.contextValue = 'group';
+        treeItem.iconPath = new vscode.ThemeIcon('folder');
+      }
       treeItem.description = `(${element.tabs.length})`;
-      treeItem.iconPath = new vscode.ThemeIcon('folder');
       return treeItem;
     }
 
@@ -663,25 +672,62 @@ export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewIte
   }
 
   /**
-   * Find a tab item by URI
+   * Find a tab item by URI.
+   * Only searches the committed cache (what the tree view has rendered).
+   * Returns undefined if the cache was invalidated and not yet rebuilt.
    */
   findTabByUri(uri: vscode.Uri): TabItem | undefined {
-    const tabs = this.getAllTabs();
-    return tabs.find((t) => t.tabKind === 'file' && t.uri?.toString() === uri.toString());
+    const children = this.cachedRootChildren;
+    if (!children) {
+      return undefined;
+    }
+    const uriStr = uri.toString();
+    for (const child of children) {
+      if (isTabItem(child) && child.tabKind === 'file' && child.uri?.toString() === uriStr) {
+        return child;
+      }
+      if (isGroupItem(child)) {
+        const match = child.tabs.find((t) => t.tabKind === 'file' && t.uri?.toString() === uriStr);
+        if (match) {
+          return match;
+        }
+      }
+    }
+    return undefined;
   }
 
   /**
    * Find the TabItem matching the currently active VS Code tab.
    * Works for all tab kinds (file, diff, webview, terminal).
+   * Only searches the committed cache to avoid returning stale objects
+   * that the tree view framework doesn't know about yet.
    */
   findActiveTab(): TabItem | undefined {
     const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
     if (!activeTab) {
       return undefined;
     }
+
+    // Only search the committed cache — if invalidated, return undefined
+    // so callers don't try to reveal an element the tree doesn't know about.
+    const children = this.cachedRootChildren;
+    if (!children) {
+      return undefined;
+    }
+
     const key = getTabKey(activeTab);
-    const tabs = this.getAllTabs();
-    return tabs.find((t) => t.tabKey === key);
+    for (const child of children) {
+      if (isTabItem(child) && child.tabKey === key) {
+        return child;
+      }
+      if (isGroupItem(child)) {
+        const match = child.tabs.find((t) => t.tabKey === key);
+        if (match) {
+          return match;
+        }
+      }
+    }
+    return undefined;
   }
 
   /**

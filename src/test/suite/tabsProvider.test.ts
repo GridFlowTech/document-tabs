@@ -555,6 +555,40 @@ suite('DocumentTabsProvider — getTreeItem()', () => {
     const treeItem = provider.getTreeItem(group);
     assert.strictEqual(treeItem.label, 'Ungrouped');
   });
+
+  test('Terminals group uses terminal icon and terminalGroup contextValue', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+
+    const group: GroupItem = {
+      type: 'group',
+      name: 'Terminals',
+      tabs: [],
+      collapsibleState: vscode.TreeItemCollapsibleState.Expanded
+    };
+
+    const treeItem = provider.getTreeItem(group);
+    assert.strictEqual(treeItem.contextValue, 'terminalGroup');
+    assert.ok(treeItem.iconPath instanceof vscode.ThemeIcon);
+    assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'terminal');
+  });
+
+  test('non-terminal group uses folder icon and group contextValue', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+
+    const group: GroupItem = {
+      type: 'group',
+      name: 'System Tabs',
+      tabs: [],
+      collapsibleState: vscode.TreeItemCollapsibleState.Expanded
+    };
+
+    const treeItem = provider.getTreeItem(group);
+    assert.strictEqual(treeItem.contextValue, 'group');
+    assert.ok(treeItem.iconPath instanceof vscode.ThemeIcon);
+    assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'folder');
+  });
 });
 
 suite('DocumentTabsProvider — getParent()', () => {

@@ -62,7 +62,8 @@ const ALL_COMMANDS = [
   'documentTabs.openToSide',
   'documentTabs.nextTab',
   'documentTabs.previousTab',
-  'documentTabs.compareSelected'
+  'documentTabs.compareSelected',
+  'documentTabs.newTerminal'
 ];
 
 suite('Extension — Activation', () => {
@@ -289,6 +290,13 @@ suite('Extension — Utility Commands', () => {
   test('previousTab command executes without error (no open tabs)', async () => {
     await vscode.commands.executeCommand('workbench.action.closeAllEditors');
     await vscode.commands.executeCommand('documentTabs.previousTab');
+    assert.ok(true);
+  });
+
+  test('newTerminal command executes without error', async () => {
+    await vscode.commands.executeCommand('documentTabs.newTerminal');
+    // Give VS Code a moment to create the terminal
+    await new Promise((resolve) => setTimeout(resolve, 300));
     assert.ok(true);
   });
 });

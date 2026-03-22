@@ -55,24 +55,35 @@ export function activate(context: vscode.ExtensionContext) {
   // Initial refresh
   tabsProvider.refresh();
 
-  // Helper function to reveal active file in tree view
-  const revealActiveTab = async () => {
-    if (treeView.visible) {
-      const tabItem = tabsProvider.findActiveTab();
-      if (tabItem) {
-        try {
-          await treeView.reveal(tabItem, { select: true, focus: false, expand: true });
-        } catch (error) {
-          console.error('DocumentTabs: Failed to reveal tab:', error);
-        }
-      }
+  // Debounced reveal — coalesces rapid-fire calls and gives the tree view
+  // framework time to finish processing getChildren() / getTreeItem() before
+  // we attempt to reveal an element.
+  let revealTimer: ReturnType<typeof setTimeout> | undefined;
+  const scheduleRevealActiveTab = () => {
+    if (revealTimer !== undefined) {
+      clearTimeout(revealTimer);
     }
+    revealTimer = setTimeout(async () => {
+      revealTimer = undefined;
+      if (!treeView.visible) {
+        return;
+      }
+      const tabItem = tabsProvider.findActiveTab();
+      if (!tabItem) {
+        return;
+      }
+      try {
+        await treeView.reveal(tabItem, { select: true, focus: false, expand: true });
+      } catch {
+        // Tree view not ready yet — silently ignore
+      }
+    }, 150);
   };
 
   // Reveal active tab when tree view becomes visible
-  const visibilityChangeListener = treeView.onDidChangeVisibility(async (e) => {
+  const visibilityChangeListener = treeView.onDidChangeVisibility((e) => {
     if (e.visible) {
-      await revealActiveTab();
+      scheduleRevealActiveTab();
     }
   });
 
@@ -110,25 +121,22 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // Listen for active editor changes to sync with main window selection
-  const activeEditorChangeListener = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+  const activeEditorChangeListener = vscode.window.onDidChangeActiveTextEditor((editor) => {
     if (editor) {
-      await revealActiveTab();
+      scheduleRevealActiveTab();
     }
   });
 
   // Also listen for generic tab activation (covers webview/terminal tabs
   // which don't trigger onDidChangeActiveTextEditor)
-  const activeTabChangeListener = vscode.window.tabGroups.onDidChangeTabs(async (event) => {
+  const activeTabChangeListener = vscode.window.tabGroups.onDidChangeTabs((event) => {
     if (event.changed.length > 0) {
       // A tab changed (possibly became active) — try to reveal it
       const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
       if (activeTab && !activeTab.input) {
-        // Unknown input type (not a text editor) — reveal it
-        await revealActiveTab();
+        scheduleRevealActiveTab();
       } else if (activeTab) {
         const input = activeTab.input;
-        // Non-text tabs: anything that isn't TabInputText, TabInputTextDiff,
-        // TabInputNotebook, TabInputNotebookDiff, TabInputCustom
         const isTextBased =
           input instanceof vscode.TabInputText ||
           input instanceof vscode.TabInputTextDiff ||
@@ -136,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
           input instanceof vscode.TabInputNotebookDiff ||
           input instanceof vscode.TabInputCustom;
         if (!isTextBased) {
-          await revealActiveTab();
+          scheduleRevealActiveTab();
         }
       }
     }
@@ -144,26 +152,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // When user clicks dead space in the tree view, the selection empties.
   // Re-select the active file so the highlight is preserved.
-  let isReselecting = false;
-  const selectionChangeListener = treeView.onDidChangeSelection(async (e) => {
-    if (isReselecting) {
-      return;
-    }
+  const selectionChangeListener = treeView.onDidChangeSelection((e) => {
     if (e.selection.length === 0) {
-      const activeEditor = vscode.window.activeTextEditor;
-      if (activeEditor) {
-        const tabItem = tabsProvider.findActiveTab();
-        if (tabItem) {
-          try {
-            isReselecting = true;
-            await treeView.reveal(tabItem, { select: true, focus: false });
-          } catch (error) {
-            console.error('DocumentTabs: Failed to re-select tab:', error);
-          } finally {
-            isReselecting = false;
-          }
-        }
-      }
+      scheduleRevealActiveTab();
     }
   });
 
@@ -892,6 +883,14 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const newTerminalCommand = vscode.commands.registerCommand('documentTabs.newTerminal', async () => {
+    try {
+      await vscode.commands.executeCommand('workbench.action.createTerminalEditor');
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to create terminal: ${error}`);
+    }
+  });
+
   const compareSelectedCommand = vscode.commands.registerCommand(
     'documentTabs.compareSelected',
     async (item: TreeViewItem, selectedItems: TreeViewItem[]) => {
@@ -975,7 +974,8 @@ export function activate(context: vscode.ExtensionContext) {
     nextTabCommand,
     previousTabCommand,
     activateTabCommand,
-    compareSelectedCommand
+    compareSelectedCommand,
+    newTerminalCommand
   );
 }
 
