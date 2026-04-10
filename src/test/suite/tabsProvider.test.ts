@@ -1172,3 +1172,164 @@ suite('DocumentTabsProvider — File Icons (showFileIcons)', () => {
     assert.strictEqual((treeItem.iconPath as vscode.ThemeIcon).id, 'file');
   });
 });
+
+suite('DocumentTabsProvider — Drag and Drop', () => {
+  let sandbox: sinon.SinonSandbox;
+
+  setup(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  teardown(() => {
+    sandbox.restore();
+    clearProjectFolderCache();
+  });
+
+  test('dragMimeTypes includes text/uri-list', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+    assert.ok(provider.dragMimeTypes.includes('text/uri-list'));
+  });
+
+  test('dropMimeTypes is empty (drag-out only)', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+    assert.strictEqual(provider.dropMimeTypes.length, 0);
+  });
+
+  test('handleDrag sets text/uri-list for file tab', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+
+    const uri = vscode.Uri.file('/workspace/src/file.ts');
+    const tab: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri,
+      label: 'file.ts',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'file',
+      tabKey: 'test-key',
+      openedAt: 1
+    };
+
+    const dataTransfer = new vscode.DataTransfer();
+    const token = new vscode.CancellationTokenSource().token;
+    provider.handleDrag([tab], dataTransfer, token);
+
+    const item = dataTransfer.get('text/uri-list');
+    assert.ok(item, 'DataTransfer should contain text/uri-list');
+    assert.strictEqual(item!.value, uri.toString());
+  });
+
+  test('handleDrag includes multiple URIs for multiple tabs', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+
+    const uri1 = vscode.Uri.file('/workspace/a.ts');
+    const uri2 = vscode.Uri.file('/workspace/b.ts');
+    const tab1: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri: uri1,
+      label: 'a.ts',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'file',
+      tabKey: 'key-1',
+      openedAt: 1
+    };
+    const tab2: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri: uri2,
+      label: 'b.ts',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'file',
+      tabKey: 'key-2',
+      openedAt: 2
+    };
+
+    const dataTransfer = new vscode.DataTransfer();
+    const token = new vscode.CancellationTokenSource().token;
+    provider.handleDrag([tab1, tab2], dataTransfer, token);
+
+    const item = dataTransfer.get('text/uri-list');
+    assert.ok(item);
+    const uris = (item!.value as string).split('\r\n');
+    assert.strictEqual(uris.length, 2);
+    assert.strictEqual(uris[0], uri1.toString());
+    assert.strictEqual(uris[1], uri2.toString());
+  });
+
+  test('handleDrag expands group items into their tab URIs', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+
+    const uri1 = vscode.Uri.file('/workspace/a.ts');
+    const uri2 = vscode.Uri.file('/workspace/b.ts');
+    const tab1: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri: uri1,
+      label: 'a.ts',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'file',
+      tabKey: 'key-1',
+      openedAt: 1
+    };
+    const tab2: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri: uri2,
+      label: 'b.ts',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'file',
+      tabKey: 'key-2',
+      openedAt: 2
+    };
+    const group: GroupItem = {
+      type: 'group',
+      name: 'src',
+      tabs: [tab1, tab2],
+      collapsibleState: vscode.TreeItemCollapsibleState.Expanded
+    };
+
+    const dataTransfer = new vscode.DataTransfer();
+    const token = new vscode.CancellationTokenSource().token;
+    provider.handleDrag([group], dataTransfer, token);
+
+    const item = dataTransfer.get('text/uri-list');
+    assert.ok(item);
+    const uris = (item!.value as string).split('\r\n');
+    assert.strictEqual(uris.length, 2);
+  });
+
+  test('handleDrag skips non-file tabs (no URI)', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+
+    const tab: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri: undefined,
+      label: 'Settings',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'webview',
+      tabKey: 'webview-key',
+      openedAt: 1
+    };
+
+    const dataTransfer = new vscode.DataTransfer();
+    const token = new vscode.CancellationTokenSource().token;
+    provider.handleDrag([tab], dataTransfer, token);
+
+    const item = dataTransfer.get('text/uri-list');
+    assert.strictEqual(item, undefined, 'No URI list should be set for non-file tabs');
+  });
+});

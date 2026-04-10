@@ -26,11 +26,39 @@ import {
  * TreeDataProvider for the Document Tabs view
  * Provides data for displaying open tabs in a tree view with grouping and sorting
  */
-export class DocumentTabsProvider implements vscode.TreeDataProvider<TreeViewItem> {
+export class DocumentTabsProvider
+  implements vscode.TreeDataProvider<TreeViewItem>, vscode.TreeDragAndDropController<TreeViewItem>
+{
   private _onDidChangeTreeData: vscode.EventEmitter<TreeViewItem | undefined | null | void> =
     new vscode.EventEmitter<TreeViewItem | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<TreeViewItem | undefined | null | void> =
     this._onDidChangeTreeData.event;
+
+  // TreeDragAndDropController — drag file URIs out (e.g. into Copilot/Claude chat)
+  readonly dropMimeTypes: readonly string[] = [];
+  readonly dragMimeTypes: readonly string[] = ['text/uri-list'];
+
+  handleDrag(
+    source: readonly TreeViewItem[],
+    dataTransfer: vscode.DataTransfer,
+    _token: vscode.CancellationToken
+  ): void {
+    const uris: string[] = [];
+    for (const item of source) {
+      if (isTabItem(item) && item.uri) {
+        uris.push(item.uri.toString());
+      } else if (isGroupItem(item)) {
+        for (const tab of item.tabs) {
+          if (tab.uri) {
+            uris.push(tab.uri.toString());
+          }
+        }
+      }
+    }
+    if (uris.length > 0) {
+      dataTransfer.set('text/uri-list', new vscode.DataTransferItem(uris.join('\r\n')));
+    }
+  }
 
   private tabOpenOrder = new Map<string, number>();
   private orderCounter = 0;

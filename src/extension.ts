@@ -46,7 +46,8 @@ export function activate(context: vscode.ExtensionContext) {
   const treeView = vscode.window.createTreeView('documentTabsView', {
     treeDataProvider: tabsProvider,
     showCollapseAll: true,
-    canSelectMany: true
+    canSelectMany: true,
+    dragAndDropController: tabsProvider
   });
 
   // Set tree view reference for badge updates

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.11] - 2026-04-09
+
+### Added
+
+- Drag-and-drop support: drag files from the Document Tabs tree into Copilot Chat, Claude Code, or any drop target that accepts file URIs
+- Dragging a group drags all file URIs within that group
+- Close (✕) button now appears on pinned tabs in the inline actions
+- 7 new test cases for drag-and-drop controller (MIME types, single/multi file, group expansion, non-file tab handling)
+
+### Fixed
+
+- Pinned tabs were missing the inline close button — the ✕ now shows for all tab types regardless of pin state
+
 ## [1.0.10] - 2026-03-22
 
 ### Added
@@ -173,7 +186,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.10...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.11...HEAD
+[1.0.11]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.7...v1.0.8
