@@ -10,7 +10,7 @@ export type SortOrder = 'alphabetical' | 'recentlyOpenedFirst' | 'recentlyOpened
 /**
  * Represents the grouping options for tabs
  */
-export type GroupBy = 'none' | 'folder' | 'extension' | 'project';
+export type GroupBy = 'none' | 'folder' | 'workspace' | 'extension' | 'project';
 
 /**
  * Represents how tabs should be colorized in the Document Tabs view.

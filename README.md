@@ -16,7 +16,8 @@ A Visual Studio-style vertical tab grouping view for VS Code. This extension pro
 
 ### 📁 Tab Grouping
 
-- **Group by Folder** - Organize tabs by their parent folder
+- **Group by Folder** - Organize tabs by their immediate parent folder
+- **Group by Workspace Folder** - Organize tabs by the top-level workspace root (great for multi-root workspaces)
 - **Group by Extension** - Organize tabs by file type (.ts, .js, .css, etc.)
 - **Group by Project** - Organize tabs by detected project (best-effort)
 - **No Grouping** - Show a flat list of all tabs
@@ -68,7 +69,7 @@ Open **Settings** and search for "Document Tabs", or run **Document Tabs: Option
 | Setting                                | Default        | Description                                                              |
 | -------------------------------------- | -------------- | ------------------------------------------------------------------------ |
 | `documentTabs.sortOrder`               | `alphabetical` | How to sort tabs (alphabetical, recentlyOpenedFirst, recentlyOpenedLast) |
-| `documentTabs.groupBy`                 | `folder`       | How to group tabs (none, folder, extension, project)                     |
+| `documentTabs.groupBy`                 | `folder`       | How to group tabs (none, folder, workspace, extension, project)          |
 | `documentTabs.showPinnedSeparately`    | `true`         | Show pinned tabs in a separate group                                     |
 | `documentTabs.showTabCount`            | `true`         | Show tab count in the view badge                                         |
 | `documentTabs.showDirtyIndicator`      | `true`         | Show indicator for unsaved files                                         |
@@ -96,6 +97,7 @@ All commands are available in the Command Palette (Ctrl+Shift+P):
 - `Document Tabs: Sort by Recently Opened Last`
 - `Document Tabs: No Grouping`
 - `Document Tabs: Group by Folder`
+- `Document Tabs: Group by Workspace Folder`
 - `Document Tabs: Group by Extension`
 - `Document Tabs: Group by Project`
 - `Document Tabs: Close All Tabs`

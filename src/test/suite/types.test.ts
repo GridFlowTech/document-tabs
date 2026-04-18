@@ -404,8 +404,8 @@ suite('types.ts — Type Interfaces', () => {
   });
 
   test('GroupBy type accepts all valid values', () => {
-    const values: GroupBy[] = ['none', 'folder', 'extension', 'project'];
-    assert.strictEqual(values.length, 4);
+    const values: GroupBy[] = ['none', 'folder', 'workspace', 'extension', 'project'];
+    assert.strictEqual(values.length, 5);
   });
 
   test('ColorBy type accepts all valid values', () => {

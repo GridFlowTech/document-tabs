@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.12] - 2026-04-18
+
+### Added
+
+- New grouping option: Group by Workspace Folder for multi-root VS Code workspaces
+
+### Changed
+
+- Clarified the distinction between Group by Folder and Group by Workspace Folder in the view menu and settings
+
 ## [1.0.11] - 2026-04-09
 
 ### Added
@@ -186,7 +196,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.11...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.12...HEAD
+[1.0.12]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.9...v1.0.10
 [1.0.9]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.8...v1.0.9

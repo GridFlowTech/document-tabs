@@ -22,6 +22,8 @@ const ALL_COMMANDS = [
   'documentTabs.groupByNone.checked',
   'documentTabs.groupByFolder',
   'documentTabs.groupByFolder.checked',
+  'documentTabs.groupByWorkspace',
+  'documentTabs.groupByWorkspace.checked',
   'documentTabs.groupByExtension',
   'documentTabs.groupByExtension.checked',
   'documentTabs.groupByProject',
@@ -187,6 +189,12 @@ suite('Extension — Group Commands', () => {
     await vscode.commands.executeCommand('documentTabs.groupByFolder');
     const config = vscode.workspace.getConfiguration('documentTabs');
     assert.strictEqual(config.get('groupBy'), 'folder');
+  });
+
+  test('groupByWorkspace sets groupBy to workspace', async () => {
+    await vscode.commands.executeCommand('documentTabs.groupByWorkspace');
+    const config = vscode.workspace.getConfiguration('documentTabs');
+    assert.strictEqual(config.get('groupBy'), 'workspace');
   });
 
   test('groupByExtension sets groupBy to extension', async () => {

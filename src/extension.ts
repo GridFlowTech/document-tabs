@@ -301,6 +301,28 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  const groupByWorkspaceCommand = vscode.commands.registerCommand(
+    'documentTabs.groupByWorkspace',
+    async () => {
+      try {
+        await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'workspace', true);
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to update grouping: ${error}`);
+      }
+    }
+  );
+
+  const groupByWorkspaceCheckedCommand = vscode.commands.registerCommand(
+    'documentTabs.groupByWorkspace.checked',
+    async () => {
+      try {
+        await vscode.workspace.getConfiguration('documentTabs').update('groupBy', 'workspace', true);
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to update grouping: ${error}`);
+      }
+    }
+  );
+
   const groupByExtensionCommand = vscode.commands.registerCommand(
     'documentTabs.groupByExtension',
     async () => {
@@ -934,6 +956,8 @@ export function activate(context: vscode.ExtensionContext) {
     groupByNoneCheckedCommand,
     groupByFolderCommand,
     groupByFolderCheckedCommand,
+    groupByWorkspaceCommand,
+    groupByWorkspaceCheckedCommand,
     groupByExtensionCommand,
     groupByExtensionCheckedCommand,
     groupByProjectCommand,

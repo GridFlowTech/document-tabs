@@ -2,7 +2,15 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as sinon from 'sinon';
 import { DocumentTabsProvider } from '../../tabsProvider';
-import { TabItem, GroupItem, TreeViewItem, isTabItem, clearProjectFolderCache } from '../../types';
+import {
+  TabItem,
+  GroupItem,
+  TreeViewItem,
+  DocumentTabsConfig,
+  isTabItem,
+  isGroupItem,
+  clearProjectFolderCache
+} from '../../types';
 
 /**
  * Creates a fake ExtensionContext with a stubbed workspaceState.
@@ -336,6 +344,68 @@ suite('DocumentTabsProvider — getChildren()', () => {
 
     const children = provider.getChildren(tab);
     assert.deepStrictEqual(children, []);
+  });
+
+  test('groups tabs by workspace folder when configured', () => {
+    const ctx = createFakeContext(sandbox);
+    const provider = new DocumentTabsProvider(ctx);
+
+    sandbox.stub(vscode.workspace, 'getWorkspaceFolder').callsFake((uri: vscode.Uri) => {
+      const path = uri.fsPath.replace(/\\/g, '/');
+      if (path.includes('/workspace-a/')) {
+        return { uri: vscode.Uri.file('/workspace-a'), name: 'Workspace A', index: 0 };
+      }
+      if (path.includes('/workspace-b/')) {
+        return { uri: vscode.Uri.file('/workspace-b'), name: 'Workspace B', index: 1 };
+      }
+      return undefined;
+    });
+
+    const tabA: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri: vscode.Uri.file('/workspace-a/src/a.ts'),
+      label: 'a.ts',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'file',
+      tabKey: 'workspace-a-key',
+      openedAt: 1
+    };
+
+    const tabB: TabItem = {
+      type: 'tab',
+      tab: {} as vscode.Tab,
+      uri: vscode.Uri.file('/workspace-b/lib/b.ts'),
+      label: 'b.ts',
+      isPinned: false,
+      isDirty: false,
+      tabKind: 'file',
+      tabKey: 'workspace-b-key',
+      openedAt: 2
+    };
+
+    const config: DocumentTabsConfig = {
+      groupBy: 'workspace',
+      sortOrder: 'alphabetical',
+      colorBy: 'none',
+      showPinnedSeparately: false,
+      showTabCount: true,
+      showDirtyIndicator: true,
+      showFileIcons: true,
+      showPath: true,
+      collapseGroupsByDefault: false
+    };
+
+    const groupTabs = (
+      provider as unknown as {
+        groupTabs: (tabs: TabItem[], config: DocumentTabsConfig) => Map<string, TabItem[]>;
+      }
+    ).groupTabs.bind(provider);
+
+    const groups = groupTabs([tabA, tabB], config);
+
+    assert.deepStrictEqual(Array.from(groups.keys()).sort(), ['Workspace A', 'Workspace B']);
   });
 });
 

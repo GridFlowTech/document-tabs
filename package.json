@@ -2,7 +2,7 @@
   "name": "document-tabs",
   "displayName": "Document Tabs",
   "description": "A Visual Studio-style vertical tab grouping view for VS Code. Shows currently open tabs in a sidebar with grouping, sorting, and tab management features.",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "license": "MIT",
   "publisher": "GridFlowTech",
   "engines": {
@@ -118,6 +118,16 @@
       {
         "command": "documentTabs.groupByFolder.checked",
         "title": "✓ Group by Folder",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.groupByWorkspace",
+        "title": "Group by Workspace Folder",
+        "category": "Document Tabs"
+      },
+      {
+        "command": "documentTabs.groupByWorkspace.checked",
+        "title": "✓ Group by Workspace Folder",
         "category": "Document Tabs"
       },
       {
@@ -403,24 +413,34 @@
           "group": "2_group@2"
         },
         {
+          "command": "documentTabs.groupByWorkspace.checked",
+          "when": "view == documentTabsView && documentTabs.groupBy == workspace",
+          "group": "2_group@3"
+        },
+        {
+          "command": "documentTabs.groupByWorkspace",
+          "when": "view == documentTabsView && documentTabs.groupBy != workspace",
+          "group": "2_group@3"
+        },
+        {
           "command": "documentTabs.groupByExtension.checked",
           "when": "view == documentTabsView && documentTabs.groupBy == extension",
-          "group": "2_group@3"
+          "group": "2_group@4"
         },
         {
           "command": "documentTabs.groupByExtension",
           "when": "view == documentTabsView && documentTabs.groupBy != extension",
-          "group": "2_group@3"
+          "group": "2_group@4"
         },
         {
           "command": "documentTabs.groupByProject.checked",
           "when": "view == documentTabsView && documentTabs.groupBy == project",
-          "group": "2_group@4"
+          "group": "2_group@5"
         },
         {
           "command": "documentTabs.groupByProject",
           "when": "view == documentTabsView && documentTabs.groupBy != project",
-          "group": "2_group@4"
+          "group": "2_group@5"
         },
         {
           "command": "documentTabs.colorByNone.checked",
@@ -671,14 +691,16 @@
           "enum": [
             "none",
             "folder",
+            "workspace",
             "extension",
             "project"
           ],
           "enumDescriptions": [
             "No grouping - show all tabs in a flat list",
-            "Group tabs by their parent folder",
+            "Group tabs by their immediate parent folder",
+            "Group tabs by the top-level VS Code workspace folder",
             "Group tabs by their file extension",
-            "Group tabs by workspace folder / project"
+            "Group tabs by detected project"
           ],
           "description": "How to group the tabs in the view"
         },

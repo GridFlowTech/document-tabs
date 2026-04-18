@@ -17,6 +17,7 @@ import {
   getFileName,
   getFileExtension,
   getParentFolder,
+  getWorkspaceFolder,
   getProjectFolder,
   getRelativePath,
   clearProjectFolderCache
@@ -438,6 +439,9 @@ export class DocumentTabsProvider
       switch (config.groupBy) {
         case 'folder':
           groupName = getParentFolder(tab.uri!);
+          break;
+        case 'workspace':
+          groupName = getWorkspaceFolder(tab.uri!);
           break;
         case 'extension':
           groupName = getFileExtension(tab.uri!);
