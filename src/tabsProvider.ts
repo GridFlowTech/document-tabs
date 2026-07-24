@@ -14,7 +14,6 @@ import {
   getTabKey,
   getTabKind,
   getWebviewViewType,
-  getFileName,
   getFileExtension,
   getParentFolder,
   getWorkspaceFolder,
@@ -356,8 +355,6 @@ export class DocumentTabsProvider
             openedAt
           });
         } else if (uri) {
-          const isDiff = tabKind === 'diff';
-
           // Pre-compute project folder if needed (uses cache when available)
           let projectFolder: string | undefined;
           if (needsProjectFolder) {
@@ -370,7 +367,7 @@ export class DocumentTabsProvider
             tabKey: key,
             tabKind,
             uri,
-            label: isDiff ? `${getFileName(uri)} (Working Tree)` : getFileName(uri),
+            label: tab.label,
             isPinned: tab.isPinned,
             isDirty: tab.isDirty,
             openedAt,

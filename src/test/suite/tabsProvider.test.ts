@@ -271,6 +271,44 @@ suite('DocumentTabsProvider — getChildren()', () => {
     assert.ok(Array.isArray(children));
   });
 
+  test('uses VS Code labels for untitled tabs and alphabetical sorting', async () => {
+    const editorConfig = vscode.workspace.getConfiguration('workbench.editor');
+    const previousLabelFormat = editorConfig.inspect<string>('untitled.labelFormat')?.globalValue;
+
+    await editorConfig.update('untitled.labelFormat', 'content', vscode.ConfigurationTarget.Global);
+
+    try {
+      const zuluDocument = await vscode.workspace.openTextDocument({
+        content: 'Zulu native label\nbody',
+        language: 'plaintext'
+      });
+      await vscode.window.showTextDocument(zuluDocument);
+
+      const alphaDocument = await vscode.workspace.openTextDocument({
+        content: 'Alpha native label\nbody',
+        language: 'plaintext'
+      });
+      await vscode.window.showTextDocument(alphaDocument);
+
+      const provider = new DocumentTabsProvider(createFakeContext(sandbox));
+      const tabs = provider.getOrderedTabs();
+      const alphaIndex = tabs.findIndex((tab) => tab.uri?.toString() === alphaDocument.uri.toString());
+      const zuluIndex = tabs.findIndex((tab) => tab.uri?.toString() === zuluDocument.uri.toString());
+
+      assert.ok(alphaIndex >= 0);
+      assert.ok(zuluIndex >= 0);
+      assert.strictEqual(tabs[alphaIndex].label, 'Alpha native label');
+      assert.strictEqual(tabs[zuluIndex].label, 'Zulu native label');
+      assert.ok(alphaIndex < zuluIndex);
+    } finally {
+      await editorConfig.update(
+        'untitled.labelFormat',
+        previousLabelFormat,
+        vscode.ConfigurationTarget.Global
+      );
+    }
+  });
+
   test('returns empty array for empty group item', () => {
     const ctx = createFakeContext(sandbox);
     const provider = new DocumentTabsProvider(ctx);

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.13] - 2026-07-24
+
+### Fixed
+
+- Tab labels and alphabetical sorting now respect `workbench.editor.labelFormat` and `workbench.editor.untitled.labelFormat`
+
 ## [1.0.12] - 2026-04-18
 
 ### Added
@@ -196,7 +202,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.12...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.13...HEAD
+[1.0.13]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.10...v1.0.11
 [1.0.10]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.9...v1.0.10
