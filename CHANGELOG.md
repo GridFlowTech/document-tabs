@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.14] - 2026-07-26
+
+### Changed
+
+- Refined Marketplace keywords to improve extension discoverability
+
 ## [1.0.13] - 2026-07-24
 
 ### Fixed
@@ -202,7 +208,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tab count badge on view
 - Expand All action in the view title
 
-[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.13...HEAD
+[Unreleased]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.14...HEAD
+[1.0.14]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.13...v1.0.14
 [1.0.13]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/GridFlowTech/document-tabs/compare/v1.0.10...v1.0.11

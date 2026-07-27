@@ -2,7 +2,7 @@
   "name": "document-tabs",
   "displayName": "Document Tabs",
   "description": "A Visual Studio-style vertical tab grouping view for VS Code. Shows currently open tabs in a sidebar with grouping, sorting, and tab management features.",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "license": "MIT",
   "publisher": "GridFlowTech",
   "engines": {
@@ -13,13 +13,14 @@
   ],
   "keywords": [
     "tabs",
-    "document tabs",
     "vertical tabs",
-    "tab groups",
     "tab management",
+    "tab groups",
+    "open files",
     "sidebar",
-    "tree view",
-    "productivity"
+    "workspace",
+    "productivity",
+    "ui"
   ],
   "activationEvents": [
     "onStartupFinished"

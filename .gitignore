@@ -26,5 +26,6 @@ npm-debug.log*
 # Local-only files
 PUBLISHING.md
 AGENTS.md
+.serena/
 Memory/
 memory/
