@@ -80,7 +80,12 @@ Open **Settings** and search for "Document Tabs", or run **Document Tabs: Option
 
 ## Keyboard Shortcuts
 
-You can assign keyboard shortcuts to Document Tabs commands:
+Default shortcuts:
+
+- `Alt+PageDown`: Go to Next Tab (Document Tabs order)
+- `Alt+PageUp`: Go to Previous Tab (Document Tabs order)
+
+To change these or assign shortcuts to other Document Tabs commands:
 
 1. Open **Keyboard Shortcuts** (Ctrl+K Ctrl+S)
 2. Search for "Document Tabs"
