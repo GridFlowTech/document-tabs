@@ -70,6 +70,7 @@ Open **Settings** and search for "Document Tabs", or run **Document Tabs: Option
 | -------------------------------------- | -------------- | ------------------------------------------------------------------------ |
 | `documentTabs.sortOrder`               | `alphabetical` | How to sort tabs (alphabetical, recentlyOpenedFirst, recentlyOpenedLast) |
 | `documentTabs.groupBy`                 | `folder`       | How to group tabs (none, folder, workspace, extension, project)          |
+| `documentTabs.colorBy`                 | `none`         | How to color tabs (none, project, extension)                             |
 | `documentTabs.showPinnedSeparately`    | `true`         | Show pinned tabs in a separate group                                     |
 | `documentTabs.showTabCount`            | `true`         | Show tab count in the view badge                                         |
 | `documentTabs.showDirtyIndicator`      | `true`         | Show indicator for unsaved files                                         |
