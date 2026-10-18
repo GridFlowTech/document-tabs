@@ -8,7 +8,6 @@ dist/
 # Dependencies
 node_modules/
 .vscode-test/
-package-lock.json
 
 # VS Code (local user settings)
 .vscode/
