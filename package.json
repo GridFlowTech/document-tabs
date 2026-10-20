@@ -768,22 +768,22 @@
     "publish": "npx @vscode/vsce publish"
   },
   "devDependencies": {
-    "@eslint/js": "^9.18.0",
+    "@eslint/js": "^9.39.5",
     "@stylistic/eslint-plugin": "^2.12.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.2",
-    "@types/sinon": "^21.0.0",
+    "@types/sinon": "^21.0.1",
     "@types/vscode": "^1.85.0",
-    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^2.5.2",
-    "@vscode/vsce": "^3.7.1",
-    "eslint": "^9.18.0",
-    "glob": "^13.0.2",
-    "mocha": "^11.7.5",
-    "prettier": "^3.4.2",
-    "sinon": "^21.0.1",
+    "@vscode/vsce": "^4.0.0",
+    "eslint": "^9.39.5",
+    "glob": "^13.0.6",
+    "mocha": "^12.0.3",
+    "prettier": "^3.9.10",
+    "sinon": "^21.1.2",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.71.2"
   },
   "repository": {
     "type": "git",
@@ -792,5 +792,8 @@
   "bugs": {
     "url": "https://github.com/GridFlowTech/document-tabs/issues"
   },
-  "homepage": "https://github.com/GridFlowTech/document-tabs#readme"
+  "homepage": "https://github.com/GridFlowTech/document-tabs#readme",
+  "overrides": {
+    "mocha": "$mocha"
+  }
 }

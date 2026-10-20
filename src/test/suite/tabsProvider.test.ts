@@ -8,7 +8,6 @@ import {
   TreeViewItem,
   DocumentTabsConfig,
   isTabItem,
-  isGroupItem,
   clearProjectFolderCache
 } from '../../types';
 
@@ -70,9 +69,7 @@ function createFakeTreeView(
     selection: [],
     onDidChangeVisibility: new vscode.EventEmitter<vscode.TreeViewVisibilityChangeEvent>().event,
     onDidChangeSelection: new vscode.EventEmitter<vscode.TreeViewSelectionChangeEvent<TreeViewItem>>().event,
-    onDidChangeCheckboxState: new vscode.EventEmitter<
-      vscode.TreeCheckboxChangeEvent<TreeViewItem>
-    >().event,
+    onDidChangeCheckboxState: new vscode.EventEmitter<vscode.TreeCheckboxChangeEvent<TreeViewItem>>().event,
     onDidExpandElement: new vscode.EventEmitter<vscode.TreeViewExpansionEvent<TreeViewItem>>().event,
     onDidCollapseElement: new vscode.EventEmitter<vscode.TreeViewExpansionEvent<TreeViewItem>>().event,
     reveal: sandbox.stub().resolves(),
